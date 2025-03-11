@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>住建局原始地址数据 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="relation-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="frame-integration.js"></script>
+    <style>
+        .data-grid {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        .address-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin-bottom: 20px;
+        }
+
+        .address-table thead {
+            background-color: #f8f9fa;
+        }
+
+        .address-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 500;
+            color: #455a64;
+            border-bottom: 2px solid #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 10;
+        }
+
+        .address-table tbody tr {
+            transition: all 0.2s;
+        }
+
+        .address-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .address-table tbody tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        .address-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eeeeee;
+            color: #37474f;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #455a64;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-actions {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .sync-info {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sync-text {
+            color: #2e7d32;
+            font-size: 14px;
+        }
+
+        .sync-time {
+            font-weight: 600;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .page-info {
+            font-size: 14px;
+            color: #455a64;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #455a64;
+        }
+
+        .page-btn.active {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        .page-btn:hover:not(.active) {
+            background-color: #f5f5f5;
+        }
+
+        .action-btn {
+            padding: 4px 8px;
+            margin-right: 4px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .action-btn.view {
+            color: #1976d2;
+        }
+
+        .action-btn:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        /* 详情模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #37474f;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #78909c;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .detail-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #78909c;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #37474f;
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-size: 24px;
+            color: #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .filter-section {
+                flex-direction: column;
+            }
+            
+            .filter-item {
+                width: 100%;
+            }
+            
+            .filter-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .status-associated {
+            background-color: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .status-partial {
+            background-color: #fff8e1;
+            color: #ff9800;
+        }
+
+        .status-not-associated {
+            background-color: #f5f5f5;
+            color: #757575;
+        }
+
+        .status-normal {
+            background-color: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .status-warning {
+            background-color: #fff8e1;
+            color: #ff9800;
+        }
+
+        /* 增强表格稳定性的样式 */
+        .address-table {
+            width: 100%;
+            table-layout: fixed; /* 确保列宽固定 */
+            border-collapse: collapse;
+        }
+
+        /* 设置固定列宽，防止内容挤压 */
+        .address-table th:nth-child(1),
+        .address-table td:nth-child(1) {
+            width: 50px;
+        }
+
+        .address-table th:nth-child(12),
+        .address-table td:nth-child(12) {
+            width: 120px;
+        }
+
+        .address-table th:nth-child(13),
+        .address-table td:nth-child(13) {
+            width: 80px;
+        }
+
+        .address-table th:nth-child(14),
+        .address-table td:nth-child(14) {
+            width: 150px;
+        }
+
+        /* 防止内容换行和溢出 */
+        .address-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>住建局原始地址数据</h1>
+                <p class="subtitle">查看和管理住建局系统的原始地址数据</p>
+            </div>
+            <div class="buttons-group">
+                <button class="btn btn-default" onclick="navigateTo('original-address-overview.html', '原始地址数据概览')">
+                    <i class="fas fa-arrow-left"></i> 返回概览
+                </button>
+            </div>
+        </header>
+        
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <div class="filter-item">
+                <label class="filter-label">区县</label>
+                <select class="filter-input" id="district-filter">
+                    <option value="">全部</option>
+                    <option value="历下区">历下区</option>
+                    <option value="市中区">市中区</option>
+                    <option value="槐荫区">槐荫区</option>
+                    <option value="天桥区">天桥区</option>
+                    <option value="历城区">历城区</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">街道</label>
+                <select class="filter-input" id="street-filter">
+                    <option value="">全部</option>
+                    <option value="泉城路街道">泉城路街道</option>
+                    <option value="解放路街道">解放路街道</option>
+                    <option value="大明湖街道">大明湖街道</option>
+                    <option value="文化东路街道">文化东路街道</option>
+                    <option value="槐荫街道">槐荫街道</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label class="filter-label">社区</label>
+                <input type="text" class="filter-input" id="community-filter" placeholder="请输入社区名称...">
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+                <button class="btn btn-default" onclick="resetFilters()">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+            </div>
+        </div>
+        
+        <!-- 数据表格 -->
+        <div class="data-grid">
+            <table class="address-table">
+                <thead>
+                    <tr>
+                        <th width="50">序号</th>
+                        <th>省</th>
+                        <th>市</th>
+                        <th>区县</th>
+                        <th>街道</th>
+                        <th>社区/委员会</th>
+                        <th>小区</th>
+                        <th>楼栋</th>
+                        <th>单元</th>
+                        <th>楼层</th>
+                        <th>门牌号</th>
+                        <th width="150">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>15层</td>
+                        <td>1502室</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(1)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>解放路街道</td>
+                        <td>解放社区</td>
+                        <td>绿地中心</td>
+                        <td>3号楼</td>
+                        <td>1单元</td>
+                        <td>6层</td>
+                        <td>601室</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(2)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>市中区</td>
+                        <td>大明湖街道</td>
+                        <td>大明湖社区</td>
+                        <td>大明湖小区</td>
+                        <td>12栋</td>
+                        <td>3单元</td>
+                        <td>8层</td>
+                        <td>802室</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(3)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>槐荫区</td>
+                        <td>槐荫街道</td>
+                        <td>槐荫社区</td>
+                        <td>槐荫小区</td>
+                        <td>7号楼</td>
+                        <td>1单元</td>
+                        <td>4层</td>
+                        <td>401室</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(4)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>天桥区</td>
+                        <td>天桥街道</td>
+                        <td>天桥社区</td>
+                        <td>天桥小区</td>
+                        <td>9栋</td>
+                        <td>2单元</td>
+                        <td>18楼</td>
+                        <td>1801号</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(5)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历城区</td>
+                        <td>文化东路街道</td>
+                        <td>文化社区</td>
+                        <td>文化路小区</td>
+                        <td>5号楼</td>
+                        <td>2单元</td>
+                        <td>11层</td>
+                        <td>1102室</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(6)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>701</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(7)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>702</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(8)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>703</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(9)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>704</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(10)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>705</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(11)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>706</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(12)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>707</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(13)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>708</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(14)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td>山东省</td>
+                        <td>济南市</td>
+                        <td>历下区</td>
+                        <td>泉城路街道</td>
+                        <td>泉城社区</td>
+                        <td>恒大名都</td>
+                        <td>8号楼</td>
+                        <td>2单元</td>
+                        <td>7层</td>
+                        <td>709</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewDetail(15)"><i class="fas fa-eye"></i> 详情</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 分页控件 -->
+        <div class="pagination">
+            <div class="page-info">
+                显示 1-8 条，共 15,642 条记录
+            </div>
+            <div class="page-controls">
+                <button class="page-btn" disabled><i class="fas fa-angle-double-left"></i></button>
+                <button class="page-btn" disabled><i class="fas fa-angle-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+                <button class="page-btn"><i class="fas fa-angle-right"></i></button>
+                <button class="page-btn"><i class="fas fa-angle-double-right"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 地址详情模态框 -->
+    <div class="modal" id="addressDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">地址详情</h4>
+                <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-group">
+                    <div class="detail-item">
+                        <div class="detail-label">省</div>
+                        <div class="detail-value" id="detail-province">山东省</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">市</div>
+                        <div class="detail-value" id="detail-city">济南市</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">区县</div>
+                        <div class="detail-value" id="detail-district">历下区</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">街道</div>
+                        <div class="detail-value" id="detail-street">泉城路街道</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">社区/委员会</div>
+                        <div class="detail-value" id="detail-community">泉城社区</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">小区</div>
+                        <div class="detail-value" id="detail-neighborhood">恒大名都</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">楼栋</div>
+                        <div class="detail-value" id="detail-building">8号楼</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">单元</div>
+                        <div class="detail-value" id="detail-unit">2单元</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">楼层</div>
+                        <div class="detail-value" id="detail-floor">6层</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">门牌号</div>
+                        <div class="detail-value" id="detail-housenumber">602</div>
+                    </div>
+                </div>
+                
+                <div class="detail-group">
+                    <div class="detail-item">
+                        <div class="detail-label">数据来源</div>
+                        <div class="detail-value" id="detail-source">住建局系统</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">匹配状态</div>
+                        <div class="detail-value" id="detail-matchstatus">已匹配</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">关联状态</div>
+                        <div class="detail-value" id="detail-relation">已关联</div>
+                    </div>
+                </div>
+                
+                <div class="detail-actions" style="margin-top: 20px; text-align: right;">
+                    <button class="btn btn-default" onclick="closeDetailModal()">关闭</button>
+                    <button class="btn btn-primary" onclick="viewMatches()">查看匹配结果</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定同步按钮
+            document.getElementById('syncBtn').addEventListener('click', function() {
+                syncAllData();
+            });
+        });
+        
+        // 应用筛选条件
+        function applyFilters() {
+            const district = document.getElementById('district-filter').value;
+            const street = document.getElementById('street-filter').value;
+            const community = document.getElementById('community-filter').value;
+            
+            // 这里应该调用后端API进行筛选
+            // 为演示目的，简单显示加载状态
+            const tbody = document.querySelector('.address-table tbody');
+            tbody.innerHTML = '<tr><td colspan="12"><div class="loading-spinner"><i class="fas fa-sync fa-spin"></i> 加载中...</div></td></tr>';
+            
+            // 模拟加载延迟
+            setTimeout(function() {
+                // 实际项目中，这里应该根据筛选结果更新表格内容
+                // 这里仅作为示例，简单地重新加载表格
+                location.reload();
+            }, 800);
+        }
+        
+        // 重置筛选条件
+        function resetFilters() {
+            document.getElementById('district-filter').selectedIndex = 0;
+            document.getElementById('street-filter').selectedIndex = 0;
+            document.getElementById('community-filter').value = '';
+        }
+        
+        // 查看地址详情
+        function viewDetail(id) {
+            // 实际项目中，这里应该根据ID调用接口获取详情数据
+            // 这里仅作为示例，直接显示模态框
+            document.getElementById('addressDetailModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+            
+            // 设置关联状态
+            if (id === 2 || id === 5) {
+                document.getElementById('detail-relation').textContent = '未关联';
+                document.getElementById('detail-relation').style.color = '#757575';
+            } else if (id === 6) {
+                document.getElementById('detail-relation').textContent = '部分关联';
+                document.getElementById('detail-relation').style.color = '#ff9800';
+            } else {
+                document.getElementById('detail-relation').textContent = '已关联';
+                document.getElementById('detail-relation').style.color = '#4caf50';
+            }
+        }
+        
+        // 关闭详情模态框
+        function closeDetailModal() {
+            document.getElementById('addressDetailModal').style.display = 'none';
+            document.body.style.overflow = ''; // 恢复背景滚动
+        }
+        
+        // 查看匹配结果
+        function viewMatches() {
+            // 实际项目中，这里应该跳转到匹配结果页面或加载匹配结果模态框
+            alert('跳转到匹配结果页面');
+            closeDetailModal();
+        }
+        
+        // 同步单个地址
+        function resyncAddress(id) {
+            if (!confirm('确定要重新同步此地址数据吗？')) {
+                return;
+            }
+            
+            // 显示同步中状态
+            const row = document.querySelectorAll('.address-table tbody tr')[id - 1];
+            const actionCell = row.querySelector('td:last-child');
+            const originalContent = actionCell.innerHTML;
+            actionCell.innerHTML = '<i class="fas fa-sync fa-spin"></i> 同步中...';
+            
+            // 模拟同步延迟
+            setTimeout(function() {
+                // 恢复原始内容
+                actionCell.innerHTML = originalContent;
+                
+                // 显示成功消息
+                alert('地址数据同步成功！');
+            }, 1500);
+        }
+        
+        // 同步所有数据
+        function syncAllData() {
+            // 显示同步中模态框
+            document.getElementById('syncingModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // 模拟同步进度
+            let progress = 0;
+            const progressBar = document.getElementById('syncProgress');
+            
+            const progressInterval = setInterval(function() {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // 模拟同步完成后关闭模态框并刷新页面
+                    setTimeout(function() {
+                        closeSyncModal();
+                        location.reload();
+                    }, 500);
+                }
+            }, 400);
+        }
+        
+        // 关闭同步模态框
+        function closeSyncModal() {
+            document.getElementById('syncingModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // 加载地址数据
+        function loadAddressData(page = 1) {
+            // 实际项目中，这里应该从后端加载数据
+            // 这里仅作为示例，模拟加载数据
+            
+            // 清空表格
+            const tableBody = document.querySelector('.address-table tbody');
+            tableBody.innerHTML = '';
+            
+            // 模拟每页8条数据
+            const pageSize = 8;
+            const startIndex = (page - 1) * pageSize;
+            
+            // 假设有模拟数据
+            for (let i = 0; i < pageSize; i++) {
+                const rowIndex = startIndex + i + 1;
+                if (rowIndex > 15) break; // 假设总共有15条数据
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rowIndex}</td>
+                    <td>山东省</td>
+                    <td>济南市</td>
+                    <td>历下区</td>
+                    <td>泉城路街道</td>
+                    <td>泉城社区</td>
+                    <td>恒大名都</td>
+                    <td>8号楼</td>
+                    <td>2单元</td>
+                    <td>${Math.floor(Math.random() * 20) + 1}层</td>
+                    <td>${Math.floor(Math.random() * 10) + 1}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}室</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewDetail(${rowIndex})"><i class="fas fa-eye"></i> 详情</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+            
+            // 更新分页信息
+            document.querySelector('.page-info').textContent = `显示 ${startIndex + 1}-${Math.min(startIndex + pageSize, 15)} 条，共 15,642 条记录`;
+        }
+
+        // 应用筛选时保持序号更新
+        function applyFilters() {
+            // 显示加载状态
+            const dataGrid = document.querySelector('.data-grid');
+            dataGrid.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 加载中...</div>';
+            
+            // 模拟延迟加载
+            setTimeout(() => {
+                // 重新加载表格，但保持序号连续
+                loadAddressData(1);
+            }, 800);
+        }
+
+        // 页面加载完成后初始化表格数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化表格并确保序号连续
+            initializeTableRows();
+            
+            // 修复数据错位
+            fixTableDataAlignment();
+        });
+        
+        // 初始化表格行并确保序号正确
+        function initializeTableRows() {
+            const tableRows = document.querySelectorAll('.address-table tbody tr');
+            
+            // 如果表格行存在，给每行添加序号
+            if (tableRows.length > 0) {
+                tableRows.forEach((row, index) => {
+                    // 检查第一个单元格是否为序号列
+                    const firstCell = row.querySelector('td:first-child');
+                    if (firstCell) {
+                        firstCell.textContent = index + 1;
+                    } else {
+                        // 如果没有第一个单元格，创建一个序号单元格
+                        const numberCell = document.createElement('td');
+                        numberCell.textContent = index + 1;
+                        row.insertBefore(numberCell, row.firstChild);
+                    }
+                });
+            } else {
+                // 如果没有行，加载示例数据
+                loadAddressData(1);
+            }
+        }
+
+        // 修复表格数据错位问题
+        function fixTableDataAlignment() {
+            const tableRows = document.querySelectorAll('.address-table tbody tr');
+            
+            tableRows.forEach((row, index) => {
+                // 获取行中的所有单元格
+                const cells = row.querySelectorAll('td');
+                
+                // 如果第一个单元格是序号但第二个单元格不是省份(山东省)
+                if (cells.length > 1 && !isNaN(cells[0].textContent) && cells[1].textContent !== '山东省') {
+                    // 创建省份单元格
+                    const provinceCell = document.createElement('td');
+                    provinceCell.textContent = '山东省';
+                    
+                    // 在序号单元格后插入省份单元格
+                    row.insertBefore(provinceCell, cells[1]);
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

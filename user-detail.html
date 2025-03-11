@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户详情 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="relation-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="frame-integration.js"></script>
+    <style>
+        .detail-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .address-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .address-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .address-title {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .address-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .required {
+            color: #f44336;
+            margin-left: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>用户详情</h1>
+                <p class="subtitle">查看和编辑用户信息</p>
+            </div>
+            <a href="user-list.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> 返回用户列表
+            </a>
+        </header>
+
+        <form id="userForm" onsubmit="return saveUser(event)">
+            <div class="detail-card">
+                <div class="card-header">
+                    <div class="card-title">基本信息</div>
+                    <div class="card-subtitle">用户的基本身份信息</div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">姓名 <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">联系电话 <span class="required">*</span></label>
+                            <input type="tel" class="form-control" id="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">证件类型 <span class="required">*</span></label>
+                            <select class="form-control" id="idType" required>
+                                <option value="身份证">身份证</option>
+                                <option value="护照">护照</option>
+                                <option value="军官证">军官证</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">证件号码 <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="idNumber" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="card-header">
+                    <div class="card-title">关联地址</div>
+                    <div class="card-subtitle">用户关联的地址信息</div>
+                </div>
+                <div class="card-body">
+                    <div class="address-card">
+                        <div class="address-header">
+                            <div class="address-title">主要居住地址</div>
+                            <div class="address-actions">
+                                <button type="button" class="btn btn-default" onclick="viewAddress(1)">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                                <button type="button" class="btn btn-default" onclick="changeAddress(1)">
+                                    <i class="fas fa-edit"></i> 更换
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">完整地址</label>
+                                <input type="text" class="form-control" value="历下区泉城路街道泉城社区恒大名都8号楼" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">房屋性质</label>
+                                <select class="form-control">
+                                    <option value="商品房">商品房</option>
+                                    <option value="租房">租房</option>
+                                    <option value="公租房">公租房</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">入住时间</label>
+                                <input type="date" class="form-control" value="2020-08-15">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">户籍人口</label>
+                                <input type="number" class="form-control" value="3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-default" onclick="addNewAddress()">
+                        <i class="fas fa-plus"></i> 添加关联地址
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="btn btn-default" onclick="history.back()">取消</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function saveUser(event) {
+            event.preventDefault();
+            // 实现保存逻辑
+            console.log('保存用户信息');
+            return false;
+        }
+
+        function viewAddress(id) {
+            window.location.href = `address-detail.html?id=${id}`;
+        }
+
+        function changeAddress(id) {
+            // 实现更换地址的逻辑
+            console.log('更换地址:', id);
+        }
+
+        function addNewAddress() {
+            // 实现添加新地址的逻辑
+            console.log('添加新地址');
+        }
+
+        // 页面加载时根据URL参数判断是新增还是编辑模式
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+            const mode = urlParams.get('mode');
+
+            if (userId && mode === 'edit') {
+                // 加载用户数据
+                loadUserData(userId);
+            }
+        });
+
+        function loadUserData(userId) {
+            // 实现加载用户数据的逻辑
+            console.log('加载用户数据:', userId);
+        }
+    </script>
+</body>
+</html> 

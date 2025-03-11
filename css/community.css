@@ -1,0 +1,364 @@
+/* 页面通用样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* 页面头部样式 */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+/* 按钮样式 */
+.btn {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-default {
+    background-color: #fff;
+    border-color: #dcdfe6;
+    color: #606266;
+}
+
+.btn-default:hover {
+    color: #409eff;
+    border-color: #409eff;
+    background-color: #ecf5ff;
+}
+
+/* 筛选区域样式 */
+.filter-section {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+}
+
+.filter-item {
+    flex: 1;
+}
+
+.filter-label {
+    display: block;
+    color: #606266;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.filter-select,
+.filter-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    color: #606266;
+    transition: all 0.3s;
+}
+
+.filter-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* 数据表格样式 */
+.data-grid {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    overflow: auto;
+    margin-bottom: 24px;
+}
+
+.community-table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.community-table th,
+.community-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebeef5;
+}
+
+.community-table th:nth-child(1),
+.community-table td:nth-child(1) {
+    width: 60px;
+}
+
+.community-table th:nth-child(2),
+.community-table td:nth-child(2) {
+    width: 120px;
+}
+
+.community-table th:nth-child(3),
+.community-table td:nth-child(3) {
+    width: 160px;
+}
+
+.community-table th:nth-child(4),
+.community-table td:nth-child(4) {
+    width: 120px;
+}
+
+.community-table th:nth-child(5),
+.community-table td:nth-child(5) {
+    width: 160px;
+}
+
+.community-table th:nth-child(6),
+.community-table td:nth-child(6) {
+    width: 100px;
+}
+
+.community-table th:nth-child(7),
+.community-table td:nth-child(7) {
+    width: 140px;
+}
+
+.community-table th:nth-child(8),
+.community-table td:nth-child(8) {
+    width: 120px;
+}
+
+.community-table th:nth-child(9),
+.community-table td:nth-child(9) {
+    width: 160px;
+}
+
+.community-table th:nth-child(10),
+.community-table td:nth-child(10) {
+    width: 150px;
+}
+
+.community-table th:nth-child(11),
+.community-table td:nth-child(11) {
+    width: 120px;
+    text-align: center;
+}
+
+.community-table th {
+    background-color: #f5f7fa;
+    color: #606266;
+    font-weight: 500;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #ebeef5;
+}
+
+.community-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebeef5;
+    color: #606266;
+}
+
+.community-table tbody tr:hover {
+    background-color: #f5f7fa;
+}
+
+/* 操作按钮样式 */
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 8px;
+}
+
+.action-btn.view {
+    background-color: #ecf5ff;
+    color: #409eff;
+}
+
+.action-btn.edit {
+    background-color: #f0f9eb;
+    color: #67c23a;
+}
+
+/* 分页控件样式 */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    gap: 8px;
+}
+
+.page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 4px;
+    border: 1px solid #dcdfe6;
+    background: #fff;
+    border-radius: 4px;
+    color: #606266;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.page-btn:hover {
+    color: #409eff;
+    border-color: #409eff;
+}
+
+.page-info {
+    color: #606266;
+    font-size: 14px;
+    margin: 0 12px;
+}
+
+/* 小区详情页样式 */
+.detail-form {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    margin-bottom: 32px;
+}
+
+.section-title {
+    font-size: 16px;
+    color: #303133;
+    font-weight: 500;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ebeef5;
+}
+
+.form-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-group.full-width {
+    flex: 3;
+}
+
+.form-label {
+    display: block;
+    color: #606266;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.required {
+    color: #f56c6c;
+    margin-left: 4px;
+}
+
+.form-control {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    color: #606266;
+    transition: all 0.3s;
+}
+
+.form-control:hover {
+    border-color: #c0c4cc;
+}
+
+.form-control:focus {
+    border-color: #409eff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23606266'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+textarea.form-control {
+    height: auto;
+    min-height: 80px;
+    padding: 8px 12px;
+    resize: vertical;
+}
+
+/* 操作按钮容器样式 */
+.action-buttons {
+    white-space: nowrap;
+} 

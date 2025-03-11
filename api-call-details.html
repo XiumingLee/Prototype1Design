@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API调用详情 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 15px;
+            gap: 5px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .nav-links {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-links a:hover {
+            border-bottom-color: #3498db;
+        }
+        
+        .nav-links a.active {
+            font-weight: 500;
+            border-bottom-color: #3498db;
+        }
+        
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .filter-select, .filter-input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .filter-button {
+            padding: 7px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .filter-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .filter-reset {
+            padding: 7px 15px;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .filter-reset:hover {
+            background-color: #bdc3c7;
+        }
+        
+        .spacer {
+            flex: 1;
+        }
+        
+        .api-calls-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .api-calls-table th {
+            padding: 15px;
+            background-color: #f8f9fa;
+            text-align: left;
+            font-weight: 500;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .api-calls-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .api-calls-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .api-calls-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: #e8f6ef;
+            color: #27ae60;
+        }
+        
+        .status-error {
+            background-color: #fdedeb;
+            color: #e74c3c;
+        }
+        
+        .status-warning {
+            background-color: #fef5e9;
+            color: #f39c12;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .method-get {
+            background-color: #e8f6ef;
+            color: #27ae60;
+        }
+        
+        .method-post {
+            background-color: #e8f4fc;
+            color: #3498db;
+        }
+        
+        .method-put {
+            background-color: #fef5e9;
+            color: #f39c12;
+        }
+        
+        .method-delete {
+            background-color: #fdedeb;
+            color: #e74c3c;
+        }
+        
+        .detail-button {
+            padding: 6px 12px;
+            background-color: #f8f9fa;
+            color: #3498db;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .detail-button:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .page-item {
+            padding: 8px 14px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .page-item.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .page-item.disabled {
+            color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .modal-close {
+            font-size: 20px;
+            color: #7f8c8d;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 15px;
+            color: #2c3e50;
+        }
+        
+        .json-viewer {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                flex-wrap: wrap;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>API调用详情列表</h1>
+                <p class="subtitle">查看标准地址服务API的调用详细记录</p>
+            </div>
+            <a href="api-monitoring.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> 返回监控概览
+            </a>
+        </header>
+        
+        <div class="filter-bar">
+            <div class="filter-group">
+                <span class="filter-label">API接口:</span>
+                <select class="filter-select" id="apiEndpoint">
+                    <option value="">全部接口</option>
+                    <option value="standardize">地址标准化</option>
+                    <option value="validate">地址验证</option>
+                    <option value="search">地址搜索</option>
+                    <option value="detail">地址详情</option>
+                    <option value="batch">批量处理</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">状态:</span>
+                <select class="filter-select" id="statusFilter">
+                    <option value="">全部状态</option>
+                    <option value="success">成功</option>
+                    <option value="error">失败</option>
+                    <option value="warning">警告</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">客户端:</span>
+                <select class="filter-select" id="clientFilter">
+                    <option value="">全部客户端</option>
+                    <option value="mobile">移动端应用</option>
+                    <option value="heating">供热系统</option>
+                    <option value="gas">燃气系统</option>
+                    <option value="construction">城建系统</option>
+                    <option value="public">公共服务</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">时间范围:</span>
+                <input type="date" class="filter-input" id="startDate">
+                <span>-</span>
+                <input type="date" class="filter-input" id="endDate">
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="filter-group">
+                <button class="filter-button" id="applyFilter">
+                    <i class="fas fa-filter"></i> 应用筛选
+                </button>
+                <button class="filter-reset" id="resetFilter">
+                    <i class="fas fa-times"></i> 重置
+                </button>
+            </div>
+        </div>
+        
+        <table class="api-calls-table">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>接口</th>
+                    <th>方法</th>
+                    <th>客户端</th>
+                    <th>IP地址</th>
+                    <th>响应时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2025-03-15 14:32:55</td>
+                    <td>/api/address/standardize</td>
+                    <td><span class="method-badge method-post">POST</span></td>
+                    <td>移动端应用</td>
+                    <td>192.168.1.101</td>
+                    <td>125 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-001')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:31:22</td>
+                    <td>/api/address/search</td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>供热系统</td>
+                    <td>192.168.1.45</td>
+                    <td>87 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-002')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:30:18</td>
+                    <td>/api/address/validate</td>
+                    <td><span class="method-badge method-post">POST</span></td>
+                    <td>燃气系统</td>
+                    <td>192.168.1.78</td>
+                    <td>95 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-003')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:28:05</td>
+                    <td>/api/address/batch</td>
+                    <td><span class="method-badge method-post">POST</span></td>
+                    <td>城建系统</td>
+                    <td>192.168.1.34</td>
+                    <td>435 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-004')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:25:42</td>
+                    <td>/api/address/detail</td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>移动端应用</td>
+                    <td>192.168.1.102</td>
+                    <td>105 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-005')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:22:18</td>
+                    <td>/api/address/standardize</td>
+                    <td><span class="method-badge method-post">POST</span></td>
+                    <td>公共服务</td>
+                    <td>192.168.1.56</td>
+                    <td>521 ms</td>
+                    <td><span class="status-badge status-warning">警告</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-006')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:20:07</td>
+                    <td>/api/address/validate</td>
+                    <td><span class="method-badge method-post">POST</span></td>
+                    <td>城建系统</td>
+                    <td>192.168.1.34</td>
+                    <td>112 ms</td>
+                    <td><span class="status-badge status-error">失败</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-007')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:18:52</td>
+                    <td>/api/address/search</td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>燃气系统</td>
+                    <td>192.168.1.78</td>
+                    <td>76 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-008')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:16:25</td>
+                    <td>/api/address/detail</td>
+                    <td><span class="method-badge method-get">GET</span></td>
+                    <td>供热系统</td>
+                    <td>192.168.1.45</td>
+                    <td>92 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-009')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2025-03-15 14:14:08</td>
+                    <td>/api/address/batch</td>
+                    <td><span class="method-badge method-post">POST</span></td>
+                    <td>移动端应用</td>
+                    <td>192.168.1.101</td>
+                    <td>385 ms</td>
+                    <td><span class="status-badge status-success">成功</span></td>
+                    <td>
+                        <button class="detail-button" onclick="showDetails('call-010')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="pagination">
+            <div class="page-item disabled">上一页</div>
+            <div class="page-item active">1</div>
+            <div class="page-item">2</div>
+            <div class="page-item">3</div>
+            <div class="page-item">4</div>
+            <div class="page-item">5</div>
+            <div class="page-item">下一页</div>
+        </div>
+        
+        <!-- API调用详情模态框 -->
+        <div class="modal" id="detailsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">API调用详情</h3>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-section">
+                        <h4 class="detail-title">基本信息</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">请求ID</span>
+                                <span class="detail-value" id="requestId">req-2c3e5d7f89b</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">调用时间</span>
+                                <span class="detail-value" id="requestTime">2025-03-15 14:32:55</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">API接口</span>
+                                <span class="detail-value" id="apiEndpoint">/api/address/standardize</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">HTTP方法</span>
+                                <span class="detail-value" id="httpMethod">POST</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">客户端</span>
+                                <span class="detail-value" id="clientName">移动端应用</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">IP地址</span>
+                                <span class="detail-value" id="ipAddress">192.168.1.101</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">响应时间</span>
+                                <span class="detail-value" id="responseTime">125 ms</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">状态</span>
+                                <span class="detail-value" id="callStatus">成功</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4 class="detail-title">请求参数</h4>
+                        <div class="json-viewer" id="requestParams">
+{
+  "address": "北京市海淀区中关村街道科技园社区中关村科技园B区8号楼2单元15层1502室",
+  "options": {
+    "normalize": true,
+    "includeComponents": true
+  }
+}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4 class="detail-title">响应数据</h4>
+                        <div class="json-viewer" id="responseData">
+{
+  "status": "success",
+  "code": 200,
+  "data": {
+    "standardAddress": "北京市海淀区中关村街道科技园社区中关村科技园B区8号楼2单元1502室",
+    "components": {
+      "province": "北京市",
+      "city": "北京市",
+      "district": "海淀区",
+      "street": "中关村街道",
+      "community": "科技园社区",
+      "road": "中关村科技园",
+      "areaCode": "B区",
+      "building": "8号楼",
+      "unit": "2单元",
+      "room": "1502室"
+    },
+    "confidence": 0.95,
+    "suggestions": []
+  }
+}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化日期选择器
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const weekAgo = new Date();
+            weekAgo.setDate(today.getDate() - 7);
+            
+            document.getElementById('startDate').valueAsDate = weekAgo;
+            document.getElementById('endDate').valueAsDate = today;
+            
+            // 绑定筛选按钮事件
+            document.getElementById('applyFilter').addEventListener('click', applyFilters);
+            document.getElementById('resetFilter').addEventListener('click', resetFilters);
+            
+            // 分页点击事件
+            const paginationItems = document.querySelectorAll('.page-item:not(.disabled)');
+            paginationItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    paginationItems.forEach(i => i.classList.remove('active'));
+                    if (this.innerText !== '上一页' && this.innerText !== '下一页') {
+                        this.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // 应用筛选条件
+        function applyFilters() {
+            const apiEndpoint = document.getElementById('apiEndpoint').value;
+            const status = document.getElementById('statusFilter').value;
+            const client = document.getElementById('clientFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            console.log('应用筛选条件', {
+                apiEndpoint,
+                status,
+                client,
+                startDate,
+                endDate
+            });
+            
+            // 实际项目中，这里应该调用API获取筛选后的数据
+            alert('已应用筛选条件，实际项目中会刷新数据列表');
+        }
+        
+        // 重置筛选条件
+        function resetFilters() {
+            document.getElementById('apiEndpoint').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('clientFilter').value = '';
+            
+            const today = new Date();
+            const weekAgo = new Date();
+            weekAgo.setDate(today.getDate() - 7);
+            
+            document.getElementById('startDate').valueAsDate = weekAgo;
+            document.getElementById('endDate').valueAsDate = today;
+        }
+        
+        // 显示调用详情
+        function showDetails(callId) {
+            console.log(`显示调用ID: ${callId} 的详情`);
+            
+            // 实际项目中，这里应该根据callId从服务器获取详细信息
+            // 这里为了演示，直接显示模态框
+            
+            document.getElementById('detailsModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+            document.body.style.overflow = ''; // 恢复背景滚动
+        }
+    </script>
+</body>
+</html> 

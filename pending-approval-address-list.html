@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>标准地址待审核列表 - 用户地址数据系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+        
+        .title-section {
+            flex: 1;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .search-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-box {
+            position: relative;
+            min-width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-left: 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            border-color: #3498db;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+        }
+        
+        .search-button {
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        
+        .search-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .advanced-filters {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .clear-button {
+            padding: 8px 16px;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .apply-button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .address-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            text-align: left;
+            padding: 15px;
+            font-weight: 500;
+            border-bottom: 1px solid #ecf0f1;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            color: #34495e;
+            transition: all 0.2s;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+        
+        /* 添加条纹行效果 */
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        /* 表格滚动容器 */
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .id-column {
+            width: 60px;
+        }
+        
+        .action-column {
+            width: 200px;
+            text-align: center;
+        }
+        
+        .action-button {
+            padding: 6px 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            margin: 0 2px;
+        }
+        
+        .action-button.approve {
+            background-color: #2ecc71;
+        }
+        
+        .action-button.reject {
+            background-color: #e74c3c;
+        }
+        
+        .action-button:hover {
+            opacity: 0.9;
+        }
+        
+        .action-button.approve:hover {
+            background-color: #27ae60;
+        }
+        
+        .action-button.reject:hover {
+            background-color: #c0392b;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .page-item {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            background-color: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 4px;
+            user-select: none;
+        }
+        
+        .page-item.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+            font-weight: 500;
+        }
+        
+        .page-item:hover:not(.active) {
+            background-color: #f5f5f5;
+            border-color: #bbb;
+        }
+        
+        .page-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+        
+        .no-results {
+            padding: 40px 20px;
+            text-align: center;
+            color: #7f8c8d;
+            background-color: #fdfdfd;
+            border-radius: 4px;
+        }
+        
+        .no-results i {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+            display: block;
+        }
+        
+        .nav-links {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-links a:hover {
+            border-bottom-color: #3498db;
+        }
+        
+        .nav-links a.active {
+            font-weight: 500;
+            border-bottom-color: #3498db;
+        }
+        
+        /* 加载动画 */
+        .table-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 卡片式表格行样式 */
+        @media (max-width: 768px) {
+            .mobile-card {
+                display: flex;
+                flex-direction: column;
+                border: 1px solid #ecf0f1;
+                border-radius: 6px;
+                margin-bottom: 15px;
+                padding: 10px;
+                background-color: white;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+            
+            .mobile-card-header {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .mobile-card-body {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .mobile-card-item {
+                margin-bottom: 5px;
+            }
+            
+            .mobile-card-label {
+                font-size: 12px;
+                color: #7f8c8d;
+            }
+            
+            .mobile-card-value {
+                font-size: 14px;
+                color: #34495e;
+            }
+            
+            .mobile-card-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 10px;
+                gap: 8px;
+            }
+        }
+        
+        /* 状态标签样式 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .status-pending {
+            background-color: #f39c12;
+        }
+        
+        .status-rejected {
+            background-color: #e74c3c;
+        }
+        
+        .status-approved {
+            background-color: #2ecc71;
+        }
+        
+        /* 审核摘要信息 */
+        .approval-summary {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .summary-item {
+            flex: 1;
+            min-width: 150px;
+            border-left: 3px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        .summary-item:nth-child(2) {
+            border-left-color: #f39c12;
+        }
+        
+        .summary-item:nth-child(3) {
+            border-left-color: #e74c3c;
+        }
+        
+        .summary-title {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .summary-value {
+            font-size: 22px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .source-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* 提交时间列样式 */
+        .submit-time {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        
+        th, td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px; /* 限制最大宽度 */
+        }
+        
+        /* 为可能出现较长文本的列设置特定样式 */
+        td.address-cell {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* 调整列宽度分配 */
+        th.province-column, td.province-column { width: 80px; }
+        th.city-column, td.city-column { width: 80px; }
+        th.district-column, td.district-column { width: 80px; }
+        th.street-column, td.street-column { width: 120px; }
+        th.community-column, td.community-column { width: 120px; }
+        th.address-column, td.address-column { width: 180px; }
+        th.time-column, td.time-column { width: 120px; white-space: nowrap; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>标准地址待审核列表</h1>
+                <p class="subtitle">审核来自各部门和系统的地址数据</p>
+            </div>
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="搜索地址、小区、门牌号..." id="searchInput">
+                </div>
+                <button class="search-button" onclick="searchAddresses()">搜索</button>
+            </div>
+        </header>
+        
+        <div class="approval-summary">
+            <div class="summary-item">
+                <div class="summary-title">总待审核</div>
+                <div class="summary-value">42</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-title">今日新增</div>
+                <div class="summary-value">8</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-title">已处理</div>
+                <div class="summary-value">12</div>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="active">全部待审核</a>
+            <a href="#">已通过</a>
+            <a href="#">已拒绝</a>
+            <a href="#">我的审核</a>
+        </div>
+        
+        <div class="advanced-filters">
+            <h3>高级筛选</h3>
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">省份</label>
+                    <select class="filter-select" id="provinceFilter">
+                        <option value="">全部</option>
+                        <option value="山东省">山东省</option>
+                        <option value="河北省">河北省</option>
+                        <option value="江苏省">江苏省</option>
+                        <option value="浙江省">浙江省</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">城市</label>
+                    <select class="filter-select" id="cityFilter">
+                        <option value="">全部</option>
+                        <option value="济南市">济南市</option>
+                        <option value="青岛市">青岛市</option>
+                        <option value="烟台市">烟台市</option>
+                        <option value="潍坊市">潍坊市</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">区县</label>
+                    <select class="filter-select" id="districtFilter">
+                        <option value="">全部</option>
+                        <option value="历下区">历下区</option>
+                        <option value="市中区">市中区</option>
+                        <option value="槐荫区">槐荫区</option>
+                        <option value="天桥区">天桥区</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">街道</label>
+                    <select class="filter-select" id="streetFilter">
+                        <option value="">全部</option>
+                        <option value="泉城路街道">泉城路街道</option>
+                        <option value="解放路街道">解放路街道</option>
+                        <option value="大明湖街道">大明湖街道</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">数据来源</label>
+                    <select class="filter-select" id="sourceFilter">
+                        <option value="">全部</option>
+                        <option value="住建局">住建局</option>
+                        <option value="供热系统">供热系统</option>
+                        <option value="燃气系统">燃气系统</option>
+                        <option value="网格员录入">网格员录入</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">提交时间</label>
+                    <select class="filter-select" id="timeFilter">
+                        <option value="">全部时间</option>
+                        <option value="today">今天</option>
+                        <option value="yesterday">昨天</option>
+                        <option value="thisWeek">本周</option>
+                        <option value="lastWeek">上周</option>
+                        <option value="thisMonth">本月</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <button class="clear-button" onclick="clearFilters()">清空筛选</button>
+                <button class="apply-button" onclick="applyFilters()">应用筛选</button>
+            </div>
+        </div>
+        
+        <div class="address-table">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="50" class="id-column">序号</th>
+                            <th class="province-column">省份</th>
+                            <th class="city-column">城市</th>
+                            <th class="district-column">区县</th>
+                            <th class="street-column">街道</th>
+                            <th class="community-column">小区</th>
+                            <th class="address-column">详细地址</th>
+                            <th width="120" class="time-column">提交时间</th>
+                            <th width="80" class="status-column">状态</th>
+                            <th width="120" class="action-column">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="addressTableBody">
+                        <!-- 数据行会通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="tableLoader" class="table-loader" style="display: none;">
+                <div class="loader-spinner"></div>
+                <p>加载中...</p>
+            </div>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <span class="page-item active">1</span>
+            <span class="page-item">2</span>
+            <span class="page-item">3</span>
+            <span class="page-item">4</span>
+            <span class="page-item">5</span>
+            <span class="page-item">...</span>
+            <span class="page-item">10</span>
+        </div>
+    </div>
+
+    <script>
+        // 模拟待审核地址数据
+        const pendingAddressData = [
+            {
+                id: 1,
+                province: '山东省',
+                city: '济南市',
+                district: '历下区',
+                street: '泉城路街道',
+                community: '恒大名都',
+                address: '8号楼2单元1502室',
+                source: '住建局',
+                status: 'pending',
+                submitTime: '2023-06-15 08:32:16'
+            },
+            {
+                id: 2,
+                province: '山东省',
+                city: '济南市',
+                district: '历下区',
+                street: '解放路街道',
+                community: '绿地中心',
+                address: '3号楼1单元601室',
+                source: '供热系统',
+                status: 'pending',
+                submitTime: '2023-06-15 09:45:22'
+            },
+            {
+                id: 3,
+                province: '山东省',
+                city: '济南市',
+                district: '市中区',
+                street: '大明湖街道',
+                community: '大明湖小区',
+                address: '12栋3单元8楼802号',
+                source: '燃气系统',
+                status: 'pending',
+                submitTime: '2023-06-14 16:12:05'
+            },
+            {
+                id: 4,
+                province: '山东省',
+                city: '济南市',
+                district: '历下区',
+                street: '文化东路街道',
+                community: '文化路小区',
+                address: '5号楼2单元1102室',
+                source: '网格员录入',
+                status: 'pending',
+                submitTime: '2023-06-14 10:23:51'
+            },
+            {
+                id: 5,
+                province: '山东省',
+                city: '济南市',
+                district: '槐荫区',
+                street: '槐荫街道',
+                community: '槐荫小区',
+                address: '7号楼1单元401室',
+                source: '供热系统',
+                status: 'pending',
+                submitTime: '2023-06-13 15:08:33'
+            },
+            {
+                id: 6,
+                province: '山东省',
+                city: '青岛市',
+                district: '市南区',
+                street: '栈桥街道',
+                community: '海景花园',
+                address: '2号楼3单元2503室',
+                source: '燃气系统',
+                status: 'pending',
+                submitTime: '2023-06-13 13:27:19'
+            },
+            {
+                id: 7,
+                province: '山东省',
+                city: '济南市',
+                district: '天桥区',
+                street: '天桥街道',
+                community: '天桥花园',
+                address: '9栋2单元1801号',
+                source: '住建局',
+                status: 'pending',
+                submitTime: '2023-06-12 09:15:44'
+            },
+            {
+                id: 8,
+                province: '江苏省',
+                city: '南京市',
+                district: '鼓楼区',
+                street: '湖南路街道',
+                community: '紫金花园',
+                address: '1号楼4单元502室',
+                source: '网格员录入',
+                status: 'pending',
+                submitTime: '2023-06-15 10:05:38'
+            }
+        ];
+        
+        // 当前显示的数据
+        let displayedData = [...pendingAddressData];
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAddressTable(displayedData);
+            setupTableSorting();
+        });
+        
+        // 渲染地址表格
+        function renderAddressTable(data) {
+            const tableBody = document.getElementById('addressTableBody');
+            tableBody.innerHTML = '';
+            
+            // 显示加载动画
+            document.getElementById('tableLoader').style.display = 'flex';
+            
+            // 模拟加载延迟（实际应用中可能不需要）
+            setTimeout(() => {
+                document.getElementById('tableLoader').style.display = 'none';
+                
+                if (data.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="10" class="no-results">
+                                <i class="fas fa-search"></i>
+                                <p>未找到匹配的待审核地址</p>
+                                <small>请尝试更改搜索条件或清除筛选</small>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                if (window.innerWidth <= 768) {
+                    // 移动设备上使用卡片式布局
+                    renderMobileCards(data, tableBody);
+                } else {
+                    // 桌面版使用表格
+                    data.forEach(address => {
+                        const row = document.createElement('tr');
+                        
+                        // 状态标签样式
+                        let statusText = "";
+                        let statusClass = "";
+                        
+                        switch(address.status) {
+                            case 'pending':
+                                statusText = "待审核";
+                                statusClass = "status-pending";
+                                break;
+                            case 'rejected':
+                                statusText = "已拒绝";
+                                statusClass = "status-rejected";
+                                break;
+                            case 'approved':
+                                statusText = "已通过";
+                                statusClass = "status-approved";
+                                break;
+                        }
+                        
+                        row.innerHTML = `
+                            <td class="id-column">${address.id}</td>
+                            <td class="province-column">${address.province}</td>
+                            <td class="city-column">${address.city}</td>
+                            <td class="district-column">${address.district}</td>
+                            <td class="street-column">${address.street}</td>
+                            <td class="community-column">${address.community}</td>
+                            <td class="address-column address-cell" title="${address.address}">${address.address}</td>
+                            <td class="time-column">${address.submitTime}</td>
+                            <td class="status-column"><span class="status-tag ${statusClass}">${statusText}</span></td>
+                            <td class="action-column">
+                                <button class="action-button" onclick="viewDetails(${address.id})">
+                                    <i class="fas fa-info-circle"></i> 查看
+                                </button>
+                                <button class="action-button approve" onclick="auditAddress(${address.id})">
+                                    <i class="fas fa-edit"></i> 审核
+                                </button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                }
+                
+                // 更新分页信息
+                updatePaginationInfo(data.length, data.length, 1);
+            }, 300);
+        }
+        
+        // 移动设备卡片式渲染
+        function renderMobileCards(data, container) {
+            data.forEach(address => {
+                // 状态标签样式
+                let statusText = "";
+                let statusClass = "";
+                
+                switch(address.status) {
+                    case 'pending':
+                        statusText = "待审核";
+                        statusClass = "status-pending";
+                        break;
+                    case 'rejected':
+                        statusText = "已拒绝";
+                        statusClass = "status-rejected";
+                        break;
+                    case 'approved':
+                        statusText = "已通过";
+                        statusClass = "status-approved";
+                        break;
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'mobile-card';
+                card.innerHTML = `
+                    <div class="mobile-card-header">
+                        <div>
+                            <strong>${address.community}</strong>
+                            <span class="status-tag ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    <div class="mobile-card-body">
+                        <div class="mobile-card-item">
+                            <div class="mobile-card-label">地区</div>
+                            <div class="mobile-card-value">${address.province} ${address.city}</div>
+                        </div>
+                        <div class="mobile-card-item">
+                            <div class="mobile-card-label">区县</div>
+                            <div class="mobile-card-value">${address.district}</div>
+                        </div>
+                        <div class="mobile-card-item">
+                            <div class="mobile-card-label">街道</div>
+                            <div class="mobile-card-value">${address.street}</div>
+                        </div>
+                        <div class="mobile-card-item">
+                            <div class="mobile-card-label">详细地址</div>
+                            <div class="mobile-card-value">${address.address}</div>
+                        </div>
+                        <div class="mobile-card-item">
+                            <div class="mobile-card-label">提交时间</div>
+                            <div class="mobile-card-value">${address.submitTime}</div>
+                        </div>
+                    </div>
+                    <div class="mobile-card-actions">
+                        <button class="action-button" onclick="viewDetails(${address.id})">
+                            <i class="fas fa-info-circle"></i> 查看
+                        </button>
+                        <button class="action-button approve" onclick="auditAddress(${address.id})">
+                            <i class="fas fa-edit"></i> 审核
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // 更新分页信息
+        function updatePaginationInfo(shown, total, page) {
+            const paginationInfo = document.createElement('div');
+            paginationInfo.className = 'page-info';
+            paginationInfo.textContent = `显示 ${shown} 条记录，共 ${total} 条记录，当前第 ${page} 页`;
+            
+            const paginationContainer = document.getElementById('pagination');
+            const existingInfo = paginationContainer.querySelector('.page-info');
+            if (existingInfo) {
+                existingInfo.remove();
+            }
+            paginationContainer.appendChild(paginationInfo);
+        }
+        
+        // 添加响应式处理
+        window.addEventListener('resize', function() {
+            renderAddressTable(displayedData);
+        });
+        
+        // 搜索地址
+        function searchAddresses() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayedData = [...pendingAddressData];
+            } else {
+                displayedData = pendingAddressData.filter(address => {
+                    // 搜索所有字段
+                    return Object.values(address).some(value => {
+                        if (typeof value === 'string') {
+                            return value.toLowerCase().includes(searchTerm);
+                        }
+                        return false;
+                    });
+                });
+            }
+            
+            renderAddressTable(displayedData);
+        }
+        
+        // 应用筛选
+        function applyFilters() {
+            const province = document.getElementById('provinceFilter').value;
+            const city = document.getElementById('cityFilter').value;
+            const district = document.getElementById('districtFilter').value;
+            const street = document.getElementById('streetFilter').value;
+            const source = document.getElementById('sourceFilter').value;
+            const timeFilter = document.getElementById('timeFilter').value;
+            
+            displayedData = pendingAddressData.filter(address => {
+                if (province && address.province !== province) return false;
+                if (city && address.city !== city) return false;
+                if (district && address.district !== district) return false;
+                if (street && address.street !== street) return false;
+                if (source && address.source !== source) return false;
+                
+                // 时间筛选逻辑（这里是简化处理，实际应用中应该有更准确的时间处理）
+                if (timeFilter) {
+                    const submitDate = new Date(address.submitTime);
+                    const today = new Date();
+                    
+                    switch (timeFilter) {
+                        case 'today':
+                            if (submitDate.toDateString() !== today.toDateString()) return false;
+                            break;
+                        case 'yesterday':
+                            const yesterday = new Date();
+                            yesterday.setDate(today.getDate() - 1);
+                            if (submitDate.toDateString() !== yesterday.toDateString()) return false;
+                            break;
+                        // 更多时间筛选条件可以在这里添加
+                    }
+                }
+                
+                return true;
+            });
+            
+            renderAddressTable(displayedData);
+        }
+        
+        // 清空筛选
+        function clearFilters() {
+            document.getElementById('provinceFilter').value = '';
+            document.getElementById('cityFilter').value = '';
+            document.getElementById('districtFilter').value = '';
+            document.getElementById('streetFilter').value = '';
+            document.getElementById('sourceFilter').value = '';
+            document.getElementById('timeFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            
+            displayedData = [...pendingAddressData];
+            renderAddressTable(displayedData);
+        }
+        
+        // 查看详情
+        function viewDetails(id) {
+            // window.location.href = `address-detail.html?id=${id}`;
+            window.location.href = `standard-address-management.html?id=${id}`;
+        }
+        
+        // 审核地址 (替代原来的approve和reject函数)
+        function auditAddress(id) {
+            window.location.href = `standard-address-management.html?id=${id}`;
+        }
+        
+        // 分页点击事件
+        document.getElementById('pagination').addEventListener('click', function(e) {
+            if (e.target.classList.contains('page-item')) {
+                const pageItems = document.querySelectorAll('.page-item');
+                pageItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // 实际项目中，这里应该加载对应页的数据
+                // 此处仅为示例，不做实际分页处理
+            }
+        });
+
+        // 添加表格排序功能
+        function setupTableSorting() {
+            const headers = document.querySelectorAll('th');
+            headers.forEach(header => {
+                if (header.textContent !== '操作' && header.textContent !== '状态') {
+                    header.style.cursor = 'pointer';
+                    
+                    // 确保每列只有一个排序图标
+                    const existingIcon = header.querySelector('i.fa-sort, i.fa-sort-up, i.fa-sort-down');
+                    if (!existingIcon) {
+                        header.innerHTML += ' <i class="fas fa-sort text-muted"></i>';
+                    }
+                    
+                    header.addEventListener('click', () => {
+                        // 提取纯文本内容，不包含图标
+                        const column = header.textContent.trim().replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/▲|▼/g, '').trim();
+                        sortTable(column, header);
+                    });
+                }
+            });
+        }
+
+        let currentSortColumn = '';
+        let sortDirection = 'asc';
+
+        function sortTable(column, header) {
+            // 转换列名到数据属性
+            const propertyMap = {
+                '序号': 'id',
+                '省份': 'province',
+                '城市': 'city',
+                '区县': 'district',
+                '街道': 'street',
+                '小区': 'community',
+                '详细地址': 'address',
+                '提交时间': 'submitTime'
+            };
+            
+            const property = propertyMap[column];
+            if (!property) return;
+            
+            // 重置所有排序图标
+            document.querySelectorAll('th i').forEach(icon => {
+                icon.className = 'fas fa-sort text-muted';
+            });
+            
+            // 切换排序方向
+            if (currentSortColumn === property) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortDirection = 'asc';
+                currentSortColumn = property;
+            }
+            
+            // 更新当前列的排序图标
+            const icon = header.querySelector('i');
+            if (icon) {
+                icon.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+            }
+            
+            // 排序数据
+            displayedData.sort((a, b) => {
+                if (property === 'id') {
+                    return sortDirection === 'asc' ? a[property] - b[property] : b[property] - a[property];
+                } else if (property === 'submitTime') {
+                    // 时间排序
+                    const dateA = new Date(a[property]);
+                    const dateB = new Date(b[property]);
+                    return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+                } else {
+                    if (sortDirection === 'asc') {
+                        return a[property].localeCompare(b[property], 'zh-CN');
+                    } else {
+                        return b[property].localeCompare(a[property], 'zh-CN');
+                    }
+                }
+            });
+            
+            renderAddressTable(displayedData);
+        }
+        
+        // 批量处理功能
+        function bulkProcess(action) {
+            const selectedIds = getSelectedAddressIds();
+            if (selectedIds.length === 0) {
+                alert('请先选择要处理的地址');
+                return;
+            }
+            
+            let message = action === 'approve' ? '批量通过审核' : '批量拒绝审核';
+            if (confirm(`确定要${message}选中的 ${selectedIds.length} 条地址记录吗？`)) {
+                // 实现批量处理逻辑
+                selectedIds.forEach(id => {
+                    const index = displayedData.findIndex(address => address.id === id);
+                    if (index !== -1) {
+                        displayedData[index].status = action === 'approve' ? 'approved' : 'rejected';
+                    }
+                });
+                
+                renderAddressTable(displayedData);
+                alert(`已${action === 'approve' ? '通过' : '拒绝'}选中的地址审核！`);
+            }
+        }
+        
+        // 获取选中的地址ID
+        function getSelectedAddressIds() {
+            // 实际应用中应该有选择功能，这里简化为返回空数组
+            return [];
+        }
+        
+        // 实时更新数据源下拉选项
+        function updateSourceOptions() {
+            const sourceFilter = document.getElementById('sourceFilter');
+            const sources = new Set();
+            
+            pendingAddressData.forEach(address => {
+                sources.add(address.source);
+            });
+            
+            let optionsHTML = '<option value="">全部</option>';
+            sources.forEach(source => {
+                optionsHTML += `<option value="${source}">${source}</option>`;
+            });
+            
+            sourceFilter.innerHTML = optionsHTML;
+        }
+        
+        // 模拟获取待审核数据
+        function fetchPendingAddresses() {
+            document.getElementById('tableLoader').style.display = 'flex';
+            
+            // 模拟API请求延迟
+            setTimeout(() => {
+                // 实际应用中这里应该是API调用
+                displayedData = [...pendingAddressData];
+                renderAddressTable(displayedData);
+            }, 500);
+        }
+        
+        // 初始化额外的事件监听
+        function initEventListeners() {
+            // 监听标签切换
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 根据选中的标签筛选数据
+                    const tabText = this.textContent.trim();
+                    
+                    if (tabText === '全部待审核') {
+                        displayedData = pendingAddressData.filter(a => a.status === 'pending');
+                    } else if (tabText === '已通过') {
+                        displayedData = pendingAddressData.filter(a => a.status === 'approved');
+                    } else if (tabText === '已拒绝') {
+                        displayedData = pendingAddressData.filter(a => a.status === 'rejected');
+                    } else if (tabText === '我的审核') {
+                        // 假设这些是当前网格员处理过的
+                        displayedData = pendingAddressData.filter(a => 
+                            a.status === 'approved' || a.status === 'rejected');
+                    }
+                    
+                    renderAddressTable(displayedData);
+                });
+            });
+        }
+        
+        // 页面初始化时调用
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAddressTable(displayedData);
+            setupTableSorting();
+            updateSourceOptions();
+            initEventListeners();
+        });
+    </script>
+</body>
+</html> 

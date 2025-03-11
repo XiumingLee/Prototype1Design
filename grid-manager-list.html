@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网格员列表管理 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="relation-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="frame-integration.js"></script>
+    <style>
+        .filter-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .manager-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        
+        .list-header {
+            background-color: #f5f7fa;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-title {
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .manager-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .manager-table th,
+        .manager-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .manager-table th {
+            background-color: #f9fafb;
+            color: #707070;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .manager-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-active {
+            background-color: #e8f5e9;
+            color: #4caf50;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-inactive {
+            background-color: #ffebee;
+            color: #f44336;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .page-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .page-item.active {
+            background-color: #2196f3;
+            color: white;
+            border-color: #2196f3;
+        }
+        
+        .page-item:hover:not(.active) {
+            background-color: #f5f5f5;
+        }
+        
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>网格员列表管理</h1>
+                <p class="subtitle">管理系统中所有网格员及其负责区域</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="openAddManagerModal()">
+                    <i class="fas fa-user-plus"></i> 新增网格员
+                </button>
+            </div>
+        </header>
+        
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <div class="filter-form">
+                <div class="filter-item">
+                    <label class="filter-label">网格员姓名</label>
+                    <input type="text" class="form-control" placeholder="请输入网格员姓名">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">工号</label>
+                    <input type="text" class="form-control" placeholder="请输入工号">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">所在区</label>
+                    <select class="form-control" id="district-select" onchange="loadStreets()">
+                        <option value="">全部</option>
+                        <option value="历下区">历下区</option>
+                        <option value="市中区">市中区</option>
+                        <option value="槐荫区">槐荫区</option>
+                        <option value="天桥区">天桥区</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">所在街道</label>
+                    <select class="form-control" id="street-select">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-default" onclick="resetFilters()">
+                    <i class="fas fa-undo"></i> 重置
+                </button>
+                <button class="btn btn-primary" onclick="searchManagers()">
+                    <i class="fas fa-search"></i> 查询
+                </button>
+            </div>
+        </div>
+        
+        <!-- 网格员列表 -->
+        <div class="manager-list">
+            <div class="list-header">
+                <div class="list-title">
+                    <i class="fas fa-users"></i> 网格员列表
+                </div>
+                <div class="list-count">
+                    共 <span id="total-count">56</span> 名网格员
+                </div>
+            </div>
+            <table class="manager-table">
+                <thead>
+                    <tr>
+                        <th width="15%">姓名</th>
+                        <th width="10%">工号</th>
+                        <th width="25%">负责网格</th>
+                        <th width="10%">负责街道数</th>
+                        <th width="10%">负责小区数</th>
+                        <th width="10%">状态</th>
+                        <th width="20%">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>张网格</td>
+                        <td>GW1001</td>
+                        <td>历下区-泉城路街道-银座网格</td>
+                        <td>15</td>
+                        <td>42</td>
+                        <td><span class="status-active">在职</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewGridManager('1001')">查看</button>
+                            <button class="action-btn btn-default" onclick="openEditManagerModal('1001')">编辑</button>
+                            <button class="action-btn btn-danger" onclick="confirmDeactivate('1001')">停用</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>李审核</td>
+                        <td>GW1002</td>
+                        <td>市中区-大观园街道-文化路网格</td>
+                        <td>12</td>
+                        <td>35</td>
+                        <td><span class="status-active">在职</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewGridManager('1002')">查看</button>
+                            <button class="action-btn btn-default" onclick="openEditManagerModal('1002')">编辑</button>
+                            <button class="action-btn btn-danger" onclick="confirmDeactivate('1002')">停用</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>王地址</td>
+                        <td>GW1003</td>
+                        <td>槐荫区-匡山街道-经七路网格</td>
+                        <td>8</td>
+                        <td>26</td>
+                        <td><span class="status-active">在职</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewGridManager('1003')">查看</button>
+                            <button class="action-btn btn-default" onclick="openEditManagerModal('1003')">编辑</button>
+                            <button class="action-btn btn-danger" onclick="confirmDeactivate('1003')">停用</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>赵核实</td>
+                        <td>GW1004</td>
+                        <td>天桥区-北园街道-华山网格</td>
+                        <td>10</td>
+                        <td>31</td>
+                        <td><span class="status-inactive">停用</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewGridManager('1004')">查看</button>
+                            <button class="action-btn btn-default" onclick="openEditManagerModal('1004')">编辑</button>
+                            <button class="action-btn btn-primary" onclick="confirmActivate('1004')">启用</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>钱小区</td>
+                        <td>GW1005</td>
+                        <td>历下区-解放路街道-泉城网格</td>
+                        <td>7</td>
+                        <td>19</td>
+                        <td><span class="status-active">在职</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewGridManager('1005')">查看</button>
+                            <button class="action-btn btn-default" onclick="openEditManagerModal('1005')">编辑</button>
+                            <button class="action-btn btn-danger" onclick="confirmDeactivate('1005')">停用</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 分页控件 -->
+            <div class="pagination">
+                <div class="page-item"><i class="fas fa-angle-left"></i></div>
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+                <div class="page-item">4</div>
+                <div class="page-item">5</div>
+                <div class="page-item"><i class="fas fa-angle-right"></i></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新增网格员弹窗 -->
+    <div class="modal" id="addManagerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">新增网格员</h3>
+                <span class="close-modal" onclick="closeAddManagerModal()">&times;</span>
+            </div>
+            <form id="addManagerForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">姓名 <span style="color: red">*</span></label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别 <span style="color: red">*</span></label>
+                        <select class="form-control" name="gender" required>
+                            <option value="">请选择</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">手机号码 <span style="color: red">*</span></label>
+                        <input type="tel" class="form-control" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">身份证号 <span style="color: red">*</span></label>
+                        <input type="text" class="form-control" name="idcard" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">所在区 <span style="color: red">*</span></label>
+                        <select class="form-control" name="district" id="add-district-select" onchange="loadAddStreets()" required>
+                            <option value="">请选择</option>
+                            <option value="历下区">历下区</option>
+                            <option value="市中区">市中区</option>
+                            <option value="槐荫区">槐荫区</option>
+                            <option value="天桥区">天桥区</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">所在街道 <span style="color: red">*</span></label>
+                        <select class="form-control" name="street" id="add-street-select" onchange="loadAddGrids()" required>
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">负责网格 <span style="color: red">*</span></label>
+                    <select class="form-control" name="grid" id="add-grid-select" required>
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">岗位职责</label>
+                    <textarea class="form-control" name="responsibility" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="closeAddManagerModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 编辑网格员弹窗 -->
+    <div class="modal" id="editManagerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">编辑网格员</h3>
+                <span class="close-modal" onclick="closeEditManagerModal()">&times;</span>
+            </div>
+            <form id="editManagerForm">
+                <input type="hidden" name="managerId" id="edit-manager-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">姓名 <span style="color: red">*</span></label>
+                        <input type="text" class="form-control" name="name" id="edit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别 <span style="color: red">*</span></label>
+                        <select class="form-control" name="gender" id="edit-gender" required>
+                            <option value="">请选择</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">手机号码 <span style="color: red">*</span></label>
+                        <input type="tel" class="form-control" name="phone" id="edit-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">身份证号 <span style="color: red">*</span></label>
+                        <input type="text" class="form-control" name="idcard" id="edit-idcard" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">所在区 <span style="color: red">*</span></label>
+                        <select class="form-control" name="district" id="edit-district-select" onchange="loadEditStreets()" required>
+                            <option value="">请选择</option>
+                            <option value="历下区">历下区</option>
+                            <option value="市中区">市中区</option>
+                            <option value="槐荫区">槐荫区</option>
+                            <option value="天桥区">天桥区</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">所在街道 <span style="color: red">*</span></label>
+                        <select class="form-control" name="street" id="edit-street-select" onchange="loadEditGrids()" required>
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">负责网格 <span style="color: red">*</span></label>
+                    <select class="form-control" name="grid" id="edit-grid-select" required>
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">岗位职责</label>
+                    <textarea class="form-control" name="responsibility" id="edit-responsibility" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="closeEditManagerModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 街道数据（实际项目中应该从API获取）
+        const streetData = {
+            '历下区': ['泉城路街道', '解放路街道', '千佛山街道', '趵突泉街道', '文东街道', '龙洞街道'],
+            '市中区': ['大观园街道', '杆石桥街道', '四里村街道', '王官庄街道', '舜玉路街道', '魏家庄街道'],
+            '槐荫区': ['匡山街道', '振兴街街道', '美里湖街道', '段店北路街道', '张庄街道', '营市街街道'],
+            '天桥区': ['北园街道', '无影山街道', '天桥东街街道', '南村街道', '堤口路街道', '制锦市街道']
+        };
+        
+        // 网格数据（实际项目中应该从API获取）
+        const gridData = {
+            '泉城路街道': ['银座网格', '恒隆网格', '商贸网格', '泉城广场网格'],
+            '解放路街道': ['省医网格', '市政府网格', '东郊网格', '解放阁网格'],
+            '千佛山街道': ['东坝网格', '千佛山公园网格', '文化东路网格'],
+            '趵突泉街道': ['趵突泉公园网格', '护城河网格', '大明湖网格'],
+            '文东街道': ['文化东路网格', '燕山立交桥网格', '姚家网格'],
+            '龙洞街道': ['龙洞网格', '山大路网格', '龙山网格'],
+            
+            '大观园街道': ['文化路网格', '大观园网格', '陡沟网格'],
+            '杆石桥街道': ['杆石桥网格', '工人新村网格', '老屯网格'],
+            '四里村街道': ['四里村网格', '鞭指巷网格', '南门洞网格'],
+            '王官庄街道': ['王官庄网格', '七贤网格', '十六里河网格'],
+            '舜玉路街道': ['舜玉路网格', '玉函路网格', '大纬网格'],
+            '魏家庄街道': ['魏家庄网格', '花园路网格', '青龙桥网格'],
+            
+            '匡山街道': ['经七路网格', '匡山网格', '西客站网格'],
+            '振兴街街道': ['振兴街网格', '西市场网格', '张庄路网格'],
+            '美里湖街道': ['美里湖网格', '腊山网格', '西郊网格'],
+            '段店北路街道': ['段店网格', '北园网格', '济兖路网格'],
+            '张庄街道': ['张庄网格', '杨金街网格', '济微路网格'],
+            '营市街街道': ['营市街网格', '三涧溪网格', '玉清湖网格'],
+            
+            '北园街道': ['北园大街网格', '无影山中路网格', '堤口路网格'],
+            '无影山街道': ['无影山网格', '药山网格', '北园网格'],
+            '天桥东街街道': ['天桥东街网格', '北坦网格', '北村网格'],
+            '南村街道': ['南村网格', '南辛庄网格', '北辛庄网格'],
+            '堤口路街道': ['堤口路网格', '黄台网格', '北园网格'],
+            '制锦市街道': ['制锦市网格', '东关网格', '北关网格']
+        };
+        
+        // 根据所选区加载街道
+        function loadStreets() {
+            const district = document.getElementById('district-select').value;
+            const streetSelect = document.getElementById('street-select');
+            
+            // 清空现有选项
+            streetSelect.innerHTML = '<option value="">全部</option>';
+            
+            if (district && streetData[district]) {
+                streetData[district].forEach(street => {
+                    const option = document.createElement('option');
+                    option.value = street;
+                    option.textContent = street;
+                    streetSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 根据所选街道加载网格
+        function loadAddGrids() {
+            const street = document.getElementById('add-street-select').value;
+            const gridSelect = document.getElementById('add-grid-select');
+            
+            // 清空现有选项
+            gridSelect.innerHTML = '<option value="">请选择</option>';
+            
+            if (street && gridData[street]) {
+                gridData[street].forEach(grid => {
+                    const option = document.createElement('option');
+                    option.value = grid;
+                    option.textContent = grid;
+                    gridSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 编辑模态框的网格加载
+        function loadEditGrids() {
+            const street = document.getElementById('edit-street-select').value;
+            const gridSelect = document.getElementById('edit-grid-select');
+            
+            // 清空现有选项
+            gridSelect.innerHTML = '<option value="">请选择</option>';
+            
+            if (street && gridData[street]) {
+                gridData[street].forEach(grid => {
+                    const option = document.createElement('option');
+                    option.value = grid;
+                    option.textContent = grid;
+                    gridSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 修改加载街道的函数，增加触发网格加载
+        function loadAddStreets() {
+            const district = document.getElementById('add-district-select').value;
+            const streetSelect = document.getElementById('add-street-select');
+            
+            // 清空现有选项
+            streetSelect.innerHTML = '<option value="">请选择</option>';
+            
+            if (district && streetData[district]) {
+                streetData[district].forEach(street => {
+                    const option = document.createElement('option');
+                    option.value = street;
+                    option.textContent = street;
+                    streetSelect.appendChild(option);
+                });
+            }
+            
+            // 清空网格选择
+            document.getElementById('add-grid-select').innerHTML = '<option value="">请选择</option>';
+        }
+        
+        // 修改编辑模态框的街道加载函数
+        function loadEditStreets() {
+            const district = document.getElementById('edit-district-select').value;
+            const streetSelect = document.getElementById('edit-street-select');
+            
+            // 清空现有选项
+            streetSelect.innerHTML = '<option value="">请选择</option>';
+            
+            if (district && streetData[district]) {
+                streetData[district].forEach(street => {
+                    const option = document.createElement('option');
+                    option.value = street;
+                    option.textContent = street;
+                    streetSelect.appendChild(option);
+                });
+            }
+            
+            // 清空网格选择
+            document.getElementById('edit-grid-select').innerHTML = '<option value="">请选择</option>';
+        }
+        
+        // 重置筛选条件
+        function resetFilters() {
+            const filterForm = document.querySelector('.filter-form');
+            const inputs = filterForm.querySelectorAll('input, select');
+            
+            inputs.forEach(input => {
+                if (input.type === 'text') {
+                    input.value = '';
+                } else if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                }
+            });
+            
+            // 清空街道选择
+            document.getElementById('street-select').innerHTML = '<option value="">全部</option>';
+        }
+        
+        // 搜索网格员
+        function searchManagers() {
+            const name = document.querySelector('.filter-form input[placeholder="请输入网格员姓名"]').value.trim();
+            const workId = document.querySelector('.filter-form input[placeholder="请输入工号"]').value.trim();
+            const district = document.getElementById('district-select').value;
+            const street = document.getElementById('street-select').value;
+            
+            console.log('搜索条件:', { name, workId, district, street });
+            
+            // 实际项目中，这里应该调用API进行搜索
+            alert('搜索功能正在开发中');
+        }
+        
+        // 打开新增网格员弹窗
+        function openAddManagerModal() {
+            document.getElementById('addManagerModal').style.display = 'block';
+            document.getElementById('addManagerForm').reset();
+        }
+        
+        // 关闭新增网格员弹窗
+        function closeAddManagerModal() {
+            document.getElementById('addManagerModal').style.display = 'none';
+        }
+        
+        // 打开编辑网格员弹窗
+        function openEditManagerModal(managerId) {
+            document.getElementById('editManagerModal').style.display = 'block';
+            document.getElementById('edit-manager-id').value = managerId;
+            
+            // 实际项目中，这里应该调用API获取网格员详情并填充表单
+            // 这里模拟一些数据
+            if (managerId === '1001') {
+                document.getElementById('edit-name').value = '张网格';
+                document.getElementById('edit-gender').value = '男';
+                document.getElementById('edit-phone').value = '13812341234';
+                document.getElementById('edit-idcard').value = '110101199001011234';
+                document.getElementById('edit-district-select').value = '历下区';
+                loadEditStreets();
+                setTimeout(() => {
+                    document.getElementById('edit-street-select').value = '泉城路街道';
+                    loadEditGrids();
+                    setTimeout(() => {
+                        document.getElementById('edit-grid-select').value = '银座网格';
+                    }, 100);
+                }, 100);
+                document.getElementById('edit-responsibility').value = '负责泉城路银座网格地区的地址审核和管理';
+            } else {
+                // 其他用户信息可以根据ID来模拟
+                alert('获取网格员信息功能正在开发中');
+            }
+        }
+        
+        // 关闭编辑网格员弹窗
+        function closeEditManagerModal() {
+            document.getElementById('editManagerModal').style.display = 'none';
+        }
+        
+        // 确认停用网格员
+        function confirmDeactivate(managerId) {
+            if (confirm('确定要停用该网格员吗？停用后将无法登录系统和审核地址。')) {
+                console.log('停用网格员:', managerId);
+                // 实际项目中，这里应该调用API停用网格员
+                alert('停用功能正在开发中');
+            }
+        }
+        
+        // 确认启用网格员
+        function confirmActivate(managerId) {
+            if (confirm('确定要启用该网格员吗？启用后可以正常登录系统和审核地址。')) {
+                console.log('启用网格员:', managerId);
+                // 实际项目中，这里应该调用API启用网格员
+                alert('启用功能正在开发中');
+            }
+        }
+        
+        // 表单提交处理
+        document.getElementById('addManagerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            console.log('新增网格员数据:', data);
+            // 实际项目中，这里应该调用API保存网格员信息
+            alert('新增网格员功能正在开发中');
+            closeAddManagerModal();
+        });
+        
+        document.getElementById('editManagerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            console.log('编辑网格员数据:', data);
+            // 实际项目中，这里应该调用API更新网格员信息
+            alert('编辑网格员功能正在开发中');
+            closeEditManagerModal();
+        });
+        
+        // 页面加载完成后执行初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('网格员列表管理页面加载完成');
+        });
+        
+        // 修改查看网格员详情的跳转方式
+        function viewGridManager(managerId) {
+            window.location.href = 'grid-manager.html?id=' + managerId;
+        }
+    </script>
+</body>
+</html> 

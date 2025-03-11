@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地址关联管理 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="relation-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="frame-integration.js"></script>
+    <style>
+        /* Table Responsiveness Fix */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .address-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+        
+        .address-table th, .address-table td {
+            padding: 10px;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* System Selector Improvement */
+        .system-selector {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+        }
+        
+        .system-option {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            background-color: #f5f5f5;
+        }
+        
+        .system-option.active {
+            background-color: white;
+            border-color: #ddd;
+            border-bottom-color: white;
+            margin-bottom: -1px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        /* Make badges consistent */
+        .system-badge {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        /* Hover effect for table rows */
+        .address-table tbody tr:hover {
+            background-color: #f0f7ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>地址关联管理</h1>
+                <p class="subtitle">管理住建局、供热系统和燃气系统之间的地址关联关系</p>
+            </div>
+            <button class="btn btn-primary" onclick="navigateTo('create-relation.html', '创建新关联')">
+                <i class="fas fa-plus"></i> 创建新关联
+            </button>
+        </header>
+        
+        <div class="tab-container">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('linked')">已关联地址</div>
+                <div class="tab" onclick="switchTab('unlinked')">未关联地址</div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- 已关联地址标签内容 -->
+                <div class="tab-pane active" id="linked">
+                    <div class="search-tools">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="搜索地址、小区、门牌号、关联ID..." id="searchLinked">
+                        </div>
+                        <button class="btn btn-primary" onclick="searchAddresses()">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                    
+                    <div class="relation-card">
+                        <div class="relation-header">
+                            <div class="relation-id">
+                                <i class="fas fa-link"></i> 关联ID: R20231201001
+                                <span class="status-badge status-active">已确认</span>
+                            </div>
+                            <div class="relation-actions">
+                                <button class="action-btn btn-view" onclick="navigateTo('address-detail.html?id=1&relation=R20231201001', '地址详情')">查看详情</button>
+                                <button class="action-btn btn-edit" onclick="editRelation('R20231201001')">编辑</button>
+                                <button class="action-btn btn-delete" onclick="confirmUnlinkAddress('R20231201001')">解除关联</button>
+                            </div>
+                        </div>
+                        
+                        <div class="systems-container">
+                            <!-- 住建局系统卡片 -->
+                            <div class="system-card">
+                                <div class="system-header">
+                                    <div class="system-name">
+                                        <i class="fas fa-building"></i> 住建局系统
+                                    </div>
+                                    <span class="system-badge badge-construction">住建</span>
+                                </div>
+                                <div class="system-body">
+                                    <div class="address-field">
+                                        <div class="field-label">省市区</div>
+                                        <div class="field-value">山东省 济南市 市中区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">街道社区</div>
+                                        <div class="field-value">大明湖街道 大明湖社区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">小区</div>
+                                        <div class="field-value">大明湖小区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼栋单元</div>
+                                        <div class="field-value">12栋 3单元</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼层门牌</div>
+                                        <div class="field-value">8楼 802号</div>
+                                    </div>
+                                    
+                                    <div class="complete-address">
+                                        山东省济南市市中区大明湖街道大明湖社区大明湖小区12栋3单元8楼802号
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 供热系统卡片 -->
+                            <div class="system-card">
+                                <div class="system-header">
+                                    <div class="system-name">
+                                        <i class="fas fa-fire"></i> 供热系统
+                                    </div>
+                                    <span class="system-badge badge-heating">供热</span>
+                                </div>
+                                <div class="system-body">
+                                    <div class="address-field">
+                                        <div class="field-label">省市区</div>
+                                        <div class="field-value">山东省 济南市 历下区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">街道社区</div>
+                                        <div class="field-value">文化东路街道 文化社区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">小区</div>
+                                        <div class="field-value">文化路小区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼栋单元</div>
+                                        <div class="field-value">5号楼 2单元</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼层门牌</div>
+                                        <div class="field-value">11层 1102室</div>
+                                    </div>
+                                    
+                                    <div class="complete-address">
+                                        山东省济南市历下区文化东路街道文化社区文化路小区5号楼2单元11层1102室
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 燃气系统卡片 -->
+                            <div class="system-card">
+                                <div class="system-header">
+                                    <div class="system-name">
+                                        <i class="fas fa-burn"></i> 燃气系统
+                                    </div>
+                                    <span class="system-badge badge-gas">燃气</span>
+                                </div>
+                                <div class="system-body">
+                                    <div class="address-field">
+                                        <div class="field-label">省市区</div>
+                                        <div class="field-value">山东省 济南市 市中区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">街道社区</div>
+                                        <div class="field-value">大明湖街道 大明湖社区委员会</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">小区</div>
+                                        <div class="field-value">大明湖小区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼栋单元</div>
+                                        <div class="field-value">12栋 3单元</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼层门牌</div>
+                                        <div class="field-value">8楼 802号</div>
+                                    </div>
+                                    
+                                    <div class="complete-address">
+                                        山东省济南市市中区大明湖街道大明湖社区委员会大明湖小区12栋3单元8楼802号
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="relation-meta">
+                            <div>创建时间: 2023-12-01 14:30</div>
+                            <div>最后更新: 2023-12-10 09:15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relation-card">
+                        <div class="relation-header">
+                            <div class="relation-id">
+                                <i class="fas fa-link"></i> 关联ID: R20231202002
+                                <span class="status-badge status-active">已确认</span>
+                            </div>
+                            <div class="relation-actions">
+                                <button class="action-btn btn-view" onclick="navigateTo('address-detail.html?id=2&relation=R20231202002', '地址详情')">查看详情</button>
+                                <button class="action-btn btn-edit" onclick="editRelation('R20231202002')">编辑</button>
+                                <button class="action-btn btn-delete" onclick="confirmUnlinkAddress('R20231202002')">解除关联</button>
+                            </div>
+                        </div>
+                        
+                        <div class="systems-container">
+                            <!-- 住建局系统卡片 -->
+                            <div class="system-card">
+                                <div class="system-header">
+                                    <div class="system-name">
+                                        <i class="fas fa-building"></i> 住建局系统
+                                    </div>
+                                    <span class="system-badge badge-construction">住建</span>
+                                </div>
+                                <div class="system-body">
+                                    <div class="address-field">
+                                        <div class="field-label">省市区</div>
+                                        <div class="field-value">山东省 济南市 槐荫区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">街道社区</div>
+                                        <div class="field-value">槐荫街道 槐荫社区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">小区</div>
+                                        <div class="field-value">槐荫二区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼栋单元</div>
+                                        <div class="field-value">5号楼 2单元</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼层门牌</div>
+                                        <div class="field-value">3楼 302号</div>
+                                    </div>
+                                    
+                                    <div class="complete-address">
+                                        山东省济南市槐荫区槐荫街道槐荫社区槐荫二区5号楼2单元3楼302号
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 供热系统卡片 -->
+                            <div class="system-card">
+                                <div class="system-header">
+                                    <div class="system-name">
+                                        <i class="fas fa-fire"></i> 供热系统
+                                    </div>
+                                    <span class="system-badge badge-heating">供热</span>
+                                </div>
+                                <div class="system-body">
+                                    <div class="address-field">
+                                        <div class="field-label">省市区</div>
+                                        <div class="field-value">山东省 济南市 历下区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">街道社区</div>
+                                        <div class="field-value">文化东路街道 文化社区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">小区</div>
+                                        <div class="field-value">文化路小区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼栋单元</div>
+                                        <div class="field-value">5号楼 2单元</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼层门牌</div>
+                                        <div class="field-value">11层 1102室</div>
+                                    </div>
+                                    
+                                    <div class="complete-address">
+                                        山东省济南市历下区文化东路街道文化社区文化路小区5号楼2单元11层1102室
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 燃气系统卡片 -->
+                            <div class="system-card">
+                                <div class="system-header">
+                                    <div class="system-name">
+                                        <i class="fas fa-burn"></i> 燃气系统
+                                    </div>
+                                    <span class="system-badge badge-gas">燃气</span>
+                                </div>
+                                <div class="system-body">
+                                    <div class="address-field">
+                                        <div class="field-label">省市区</div>
+                                        <div class="field-value">山东省 济南市 槐荫区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">街道社区</div>
+                                        <div class="field-value">槐荫街道 槐荫社区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">小区</div>
+                                        <div class="field-value">槐荫二区</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼栋单元</div>
+                                        <div class="field-value">5号楼 2单元</div>
+                                    </div>
+                                    <div class="address-field">
+                                        <div class="field-label">楼层门牌</div>
+                                        <div class="field-value">3楼 302号</div>
+                                    </div>
+                                    
+                                    <div class="complete-address">
+                                        山东省济南市槐荫区槐荫街道槐荫社区槐荫二区5号楼2单元3楼302号
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="relation-meta">
+                            <div>创建时间: 2023-12-02 09:15</div>
+                            <div>最后更新: 2023-12-02 09:15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pagination">
+                        <span class="page-item active">1</span>
+                        <span class="page-item">2</span>
+                        <span class="page-item">3</span>
+                    </div>
+                </div>
+                
+                <!-- 未关联地址标签内容 -->
+                <div class="tab-pane" id="unlinked">
+                    <div class="search-tools">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="搜索未关联地址..." id="searchUnlinked">
+                        </div>
+                        <button class="btn btn-primary" onclick="searchUnlinkedAddresses()">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                    
+                    <div class="unlinked-list">
+                        <div class="table-responsive">
+                        <table class="address-table" id="relationTable">
+                            <thead>
+                                <tr>
+                                    <th width="40"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()"></th>
+                                    <th width="50">序号</th>
+                                    <th width="80">系统</th>
+                                    <th>完整地址</th>
+                                    <th width="120">原始ID</th>
+                                    <th width="120">标准地址ID</th>
+                                    <th width="150">匹配度</th>
+                                    <th width="180">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" name="relationId" value="1"></td>
+                                    <td>1</td>
+                                    <td><span class="system-badge badge-construction">住建</span></td>
+                                    <td>山东省济南市历下区泉城路街道泉城社区恒大名都8号楼2单元15层1502室</td>
+                                    <td>CON10023</td>
+                                    <td>STD20045</td>
+                                    <td>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 96%"></div>
+                                            <span class="progress-text">96%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn btn-view" onclick="viewRelationDetail(1)">查看</button>
+                                        <button class="action-btn btn-warning" onclick="confirmUnlinkAddress(1)">解除关联</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="relationId" value="2"></td>
+                                    <td>2</td>
+                                    <td><span class="system-badge badge-heating">供热</span></td>
+                                    <td>山东省济南市历下区泉城路街道泉城社区恒大名都8号楼2单元15层1502室</td>
+                                    <td>HEA10023</td>
+                                    <td>STD20046</td>
+                                    <td>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 96%"></div>
+                                            <span class="progress-text">96%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn btn-view" onclick="viewRelationDetail(2)">查看</button>
+                                        <button class="action-btn btn-warning" onclick="confirmUnlinkAddress(2)">解除关联</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" name="relationId" value="3"></td>
+                                    <td>3</td>
+                                    <td><span class="system-badge badge-gas">燃气</span></td>
+                                    <td>山东省济南市历下区泉城路街道泉城社区恒大名都8号楼2单元15层1502室</td>
+                                    <td>GAS10023</td>
+                                    <td>STD20047</td>
+                                    <td>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 96%"></div>
+                                            <span class="progress-text">96%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn btn-view" onclick="viewRelationDetail(3)">查看</button>
+                                        <button class="action-btn btn-warning" onclick="confirmUnlinkAddress(3)">解除关联</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button class="btn btn-primary" onclick="batchLinkAddresses()">
+                            <i class="fas fa-link"></i> 批量创建关联
+                        </button>
+                    </div>
+                    
+                    <div class="pagination">
+                        <span class="page-item active">1</span>
+                        <span class="page-item">2</span>
+                        <span class="page-item">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认解除关联的模态框 -->
+    <div class="modal" id="unlinkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>确认解除关联</h4>
+                <span class="close" onclick="closeModal('unlinkModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>您确定要解除地址关联关系 <span id="unlinkRelationId" class="highlight-text"></span> 吗？</p>
+                <p class="warning-text">此操作将会删除三个系统之间的关联关系，但不会删除原始地址数据。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeModal('unlinkModal')">取消</button>
+                <button class="btn btn-danger" onclick="unlinkAddress()">确认解除</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="relation-scripts.js"></script>
+    <script>
+        function viewAddress(id) {
+            window.location.href = `address-detail.html?id=${id}`;
+        }
+        
+        function linkAddress(id) {
+            window.location.href = `create-relation.html?id=${id}`;
+        }
+        
+        // 编辑关联关系
+        function editRelation(relationId) {
+            window.location.href = `edit-relation.html?id=${relationId}`;
+        }
+        
+        function batchLinkAddresses() {
+            const checkboxes = document.querySelectorAll('input[name="relationId"]:checked');
+            const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+            
+            if (selectedIds.length === 0) {
+                alert('请至少选择一个地址');
+                return;
+            }
+            
+            window.location.href = `create-relation.html?ids=${selectedIds.join(',')}`;
+        }
+
+        // 为切换标签准备的函数
+        function switchTab(tab) {
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            const tabs = document.querySelectorAll('.tab');
+            
+            // 移除所有标签和标签内容的激活状态
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // 激活选定的标签和内容
+            document.getElementById(tab).classList.add('active');
+            document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
+            
+            // 如果切换到未关联标签，加载所有未关联地址
+            if (tab === 'unlinked') {
+                loadAllUnlinkedAddresses();
+            }
+        }
+
+        // 加载所有未关联地址（来自所有系统）
+        function loadAllUnlinkedAddresses() {
+            // 清除当前表格内容
+            const tableBody = document.getElementById('relationTable');
+            if (!tableBody) return;
+            
+            // 模拟从所有系统获取数据，实际项目中应该从后端获取
+            const allAddressData = [
+                // 住建局系统地址
+                { id: 101, system: 'construction', systemName: '住建', 
+                  province: '山东省', city: '济南市', district: '市中区', 
+                  street: '大明湖街道', community: '大明湖社区', area: '大明湖小区', 
+                  building: '12栋', unit: '3单元', floor: '8楼', room: '802号' },
+                { id: 104, system: 'construction', systemName: '住建', 
+                  province: '山东省', city: '济南市', district: '槐荫区', 
+                  street: '槐荫街道', community: '槐荫社区', area: '槐荫二区', 
+                  building: '5号楼', unit: '2单元', floor: '3楼', room: '302号' },
+                
+                // 供热系统地址
+                { id: 102, system: 'heating', systemName: '供热', 
+                  province: '山东省', city: '济南市', district: '历下区', 
+                  street: '文化东路街道', community: '文化社区', area: '文化路小区', 
+                  building: '5号楼', unit: '2单元', floor: '11层', room: '1102室' },
+                { id: 105, system: 'heating', systemName: '供热', 
+                  province: '山东省', city: '济南市', district: '天桥区', 
+                  street: '天桥街道', community: '天桥社区', area: '天桥小区', 
+                  building: '8栋', unit: '1单元', floor: '6楼', room: '601室' },
+                
+                // 燃气系统地址
+                { id: 103, system: 'gas', systemName: '燃气', 
+                  province: '山东省', city: '济南市', district: '市中区', 
+                  street: '大明湖街道', community: '大明湖社区委员会', area: '大明湖小区', 
+                  building: '12栋', unit: '3单元', floor: '8楼', room: '802号' },
+                { id: 106, system: 'gas', systemName: '燃气', 
+                  province: '山东省', city: '济南市', district: '槐荫区', 
+                  street: '槐荫街道', community: '槐荫社区', area: '槐荫二区', 
+                  building: '5号楼', unit: '2单元', floor: '3楼', room: '302号' }
+            ];
+            
+            // 清空表格并填充所有系统的数据
+            tableBody.innerHTML = '';
+            allAddressData.forEach(address => {
+                const badgeClass = `badge-${address.system}`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" name="relationId" value="${address.id}"></td>
+                    <td>${address.id}</td>
+                    <td><span class="system-badge ${badgeClass}">${address.systemName}</span></td>
+                    <td>${address.province} ${address.city} ${address.district} ${address.street} ${address.community} ${address.area} ${address.building} ${address.unit} ${address.floor} ${address.room}</td>
+                    <td>${address.id}</td>
+                    <td>${address.id}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 96%"></div>
+                            <span class="progress-text">96%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="viewAddress(${address.id})">查看</button>
+                        <button class="action-btn btn-primary" onclick="linkAddress(${address.id})">关联</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 搜索未关联地址
+        function searchUnlinkedAddresses() {
+            const searchInput = document.getElementById('searchUnlinked');
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            // 如果搜索框为空，加载所有地址
+            if (!searchTerm) {
+                loadAllUnlinkedAddresses();
+                return;
+            }
+            
+            // 加载所有地址然后进行过滤
+            const tableBody = document.getElementById('relationTable');
+            if (!tableBody) return;
+            
+            // 模拟从所有系统获取数据，实际项目中应该从后端获取
+            const allAddressData = [
+                // 住建局系统地址
+                { id: 101, system: 'construction', systemName: '住建', 
+                  province: '山东省', city: '济南市', district: '市中区', 
+                  street: '大明湖街道', community: '大明湖社区', area: '大明湖小区', 
+                  building: '12栋', unit: '3单元', floor: '8楼', room: '802号' },
+                { id: 104, system: 'construction', systemName: '住建', 
+                  province: '山东省', city: '济南市', district: '槐荫区', 
+                  street: '槐荫街道', community: '槐荫社区', area: '槐荫二区', 
+                  building: '5号楼', unit: '2单元', floor: '3楼', room: '302号' },
+                
+                // 供热系统地址
+                { id: 102, system: 'heating', systemName: '供热', 
+                  province: '山东省', city: '济南市', district: '历下区', 
+                  street: '文化东路街道', community: '文化社区', area: '文化路小区', 
+                  building: '5号楼', unit: '2单元', floor: '11层', room: '1102室' },
+                { id: 105, system: 'heating', systemName: '供热', 
+                  province: '山东省', city: '济南市', district: '天桥区', 
+                  street: '天桥街道', community: '天桥社区', area: '天桥小区', 
+                  building: '8栋', unit: '1单元', floor: '6楼', room: '601室' },
+                
+                // 燃气系统地址
+                { id: 103, system: 'gas', systemName: '燃气', 
+                  province: '山东省', city: '济南市', district: '市中区', 
+                  street: '大明湖街道', community: '大明湖社区委员会', area: '大明湖小区', 
+                  building: '12栋', unit: '3单元', floor: '8楼', room: '802号' },
+                { id: 106, system: 'gas', systemName: '燃气', 
+                  province: '山东省', city: '济南市', district: '槐荫区', 
+                  street: '槐荫街道', community: '槐荫社区', area: '槐荫二区', 
+                  building: '5号楼', unit: '2单元', floor: '3楼', room: '302号' }
+            ];
+            
+            // 过滤匹配搜索词的地址
+            const filteredAddresses = allAddressData.filter(address => {
+                const addressText = `${address.systemName} ${address.province} ${address.city} ${address.district} ${address.street} ${address.community} ${address.area} ${address.building} ${address.unit} ${address.floor} ${address.room}`.toLowerCase();
+                return addressText.includes(searchTerm);
+            });
+            
+            // 清空表格并填充匹配的地址
+            tableBody.innerHTML = '';
+            filteredAddresses.forEach(address => {
+                const badgeClass = `badge-${address.system}`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" name="relationId" value="${address.id}"></td>
+                    <td>${address.id}</td>
+                    <td><span class="system-badge ${badgeClass}">${address.systemName}</span></td>
+                    <td>${address.province} ${address.city} ${address.district} ${address.street} ${address.community} ${address.area} ${address.building} ${address.unit} ${address.floor} ${address.room}</td>
+                    <td>${address.id}</td>
+                    <td>${address.id}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 96%"></div>
+                            <span class="progress-text">96%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="viewAddress(${address.id})">查看</button>
+                        <button class="action-btn btn-primary" onclick="linkAddress(${address.id})">关联</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 全选/取消全选功能
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const checkboxes = document.querySelectorAll('input[name="relationId"]');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        // 确认解除关联的弹窗处理
+        function confirmUnlinkAddress(relationId) {
+            document.getElementById('unlinkRelationId').textContent = relationId;
+            document.getElementById('unlinkModal').style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function unlinkAddress() {
+            const relationId = document.getElementById('unlinkRelationId').textContent;
+            console.log(`解除关联: ${relationId}`);
+            // 这里应该添加实际解除关联的代码，例如发送API请求
+            closeModal('unlinkModal');
+            // 操作成功后应该刷新列表
+        }
+
+        // 当页面加载完成时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 默认加载所有未关联地址
+            if (document.getElementById('unlinked').classList.contains('active')) {
+                loadAllUnlinkedAddresses();
+            }
+        });
+    </script>
+</body>
+</html>

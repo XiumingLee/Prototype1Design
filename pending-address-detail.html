@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待审核地址详情 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="relation-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="frame-integration.js"></script>
+    <style>
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-pending {
+            background-color: #fff8e1;
+            color: #ff9800;
+        }
+        
+        .status-approved {
+            background-color: #e8f5e9;
+            color: #4caf50;
+        }
+        
+        .status-rejected {
+            background-color: #ffebee;
+            color: #f44336;
+        }
+        
+        .address-info-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .address-header {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .address-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .address-title h3 {
+            font-weight: 500;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .address-body {
+            padding: 20px;
+        }
+        
+        .address-section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #34495e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            width: 120px;
+            color: #7f8c8d;
+            font-weight: normal;
+        }
+        
+        .info-value {
+            flex: 1;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .info-value.highlight {
+            color: #3498db;
+        }
+        
+        .info-block {
+            margin-bottom: 15px;
+        }
+        
+        .info-block-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        
+        .info-footer {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .meta-info {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .map-container {
+            height: 300px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0 20px;
+            color: #6c757d;
+        }
+        
+        .history-item {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .history-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e3f2fd;
+            color: #2196f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            z-index: 2;
+        }
+        
+        .history-icon.approved {
+            background-color: #e8f5e9;
+            color: #4caf50;
+        }
+        
+        .history-icon.rejected {
+            background-color: #ffebee;
+            color: #f44336;
+        }
+        
+        .history-content {
+            flex: 1;
+            padding-bottom: 20px;
+        }
+        
+        .history-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .history-desc {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .history-date {
+            color: #95a5a6;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .history-item::before {
+            content: '';
+            position: absolute;
+            left: 18px;
+            top: 36px;
+            bottom: 0;
+            width: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        
+        .history-item:last-child::before {
+            display: none;
+        }
+        
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .diff-table th {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 10px;
+            font-weight: 500;
+            border: 1px solid #eee;
+        }
+        
+        .diff-table td {
+            padding: 10px;
+            border: 1px solid #eee;
+        }
+        
+        .diff-old {
+            background-color: #ffebee;
+            text-decoration: line-through;
+            color: #f44336;
+        }
+        
+        .diff-new {
+            background-color: #e8f5e9;
+            color: #4caf50;
+        }
+        
+        .grid-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .grid-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e3f2fd;
+            color: #2196f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .grid-name {
+            font-weight: 500;
+        }
+        
+        .grid-position {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>待审核地址详情</h1>
+                <p class="subtitle">查看待审核标准地址的详细信息</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-default" onclick="navigateTo('pending-address-list.html', '待审核地址')">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </button>
+                <button class="btn btn-primary" id="approveBtn" onclick="navigateTo('pending-address-approve.html?id=1001', '审批地址')">
+                    <i class="fas fa-check-circle"></i> 审批
+                </button>
+            </div>
+        </header>
+        
+        <!-- 地址详情卡片 -->
+        <div class="address-info-card">
+            <div class="address-header">
+                <div class="address-title">
+                    <h3>标准地址详情</h3>
+                    <span class="status-pill status-pending" id="addressStatus">
+                        <i class="fas fa-clock"></i> 待审核
+                    </span>
+                </div>
+                <div class="complete-address" id="completeAddress">
+                    山东省济南市历下区泉城路街道泉城社区恒大名都8号楼2单元15层1502室
+                </div>
+            </div>
+            
+            <div class="address-body">
+                <div class="address-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i> 地址组成
+                    </h4>
+                    <div class="info-row">
+                        <div class="info-label">省份</div>
+                        <div class="info-value">山东省</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">城市</div>
+                        <div class="info-value">济南市</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">区县</div>
+                        <div class="info-value">历下区</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">街道</div>
+                        <div class="info-value">泉城路街道</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">社区</div>
+                        <div class="info-value">泉城社区</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">小区/街坊</div>
+                        <div class="info-value">恒大名都</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">楼栋号</div>
+                        <div class="info-value">8号楼</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">单元号</div>
+                        <div class="info-value">2单元</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">楼层</div>
+                        <div class="info-value">15层</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">房间号</div>
+                        <div class="info-value">1502室</div>
+                    </div>
+                </div>
+                
+                <div class="address-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle"></i> 其他信息
+                    </h4>
+                    <div class="info-row">
+                        <div class="info-label">所属网格</div>
+                        <div class="info-value">中关村网格</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">地址来源</div>
+                        <div class="info-value">住建局系统导入</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">创建时间</div>
+                        <div class="info-value">2025-03-20 09:45:30</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">提交审核</div>
+                        <div class="info-value">系统管理员（admin@example.com）</div>
+                    </div>
+                    
+                    <div class="grid-info">
+                        <div class="grid-avatar">张</div>
+                        <div>
+                            <div class="grid-name">张网格</div>
+                            <div class="grid-position">中关村街道 - 网格员</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="address-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-map"></i> 地图位置
+                    </h4>
+                    <div class="map-container">
+                        <div>此处显示地址在地图上的位置（实际项目中集成地图API）</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">坐标信息</div>
+                        <div class="info-value">经度: 116.328616, 纬度: 39.989465</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-footer">
+                <div class="meta-info">
+                    关联ID: A20231220001 · 最后更新: 2023-12-20 14:30
+                </div>
+                <div id="actionButtons">
+                    <button class="btn btn-primary" onclick="navigateTo('pending-address-approve.html?id=1001', '审批地址')">
+                        <i class="fas fa-check-circle"></i> 审批
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 标签页切换 -->
+        <div class="tab-container">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('changes')">变更内容</div>
+                <div class="tab" onclick="switchTab('relations')">关联信息</div>
+                <div class="tab" onclick="switchTab('history')">审核历史</div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- 变更内容标签页 -->
+                <div class="tab-pane active" id="changes">
+                    <div class="info-block">
+                        <div class="info-block-title">变更说明</div>
+                        <p>本次提交修改了小区名称、楼栋号和单元号，以匹配实际现场调查结果。</p>
+                    </div>
+                    
+                    <div class="info-block">
+                        <div class="info-block-title">变更字段对比</div>
+                        <table class="diff-table">
+                            <thead>
+                                <tr>
+                                    <th width="150px">字段</th>
+                                    <th>原值</th>
+                                    <th>新值</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>小区/街坊</td>
+                                    <td class="diff-old">中关村科技园</td>
+                                    <td class="diff-new">中关村科技园B区</td>
+                                </tr>
+                                <tr>
+                                    <td>楼栋号</td>
+                                    <td class="diff-old">8栋</td>
+                                    <td class="diff-new">8号楼</td>
+                                </tr>
+                                <tr>
+                                    <td>单元号</td>
+                                    <td class="diff-old">二单元</td>
+                                    <td class="diff-new">2单元</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 关联信息标签页 -->
+                <div class="tab-pane" id="relations">
+                    <div class="info-block">
+                        <div class="info-block-title">关联的系统地址</div>
+                        
+                        <div class="system-card">
+                            <div class="system-header">
+                                <div class="system-name">
+                                    <i class="fas fa-building"></i> 住建局系统
+                                </div>
+                                <span class="system-badge badge-construction">住建</span>
+                            </div>
+                            <div class="system-body">
+                                <div class="address-field">
+                                    <div class="field-label">地址ID</div>
+                                    <div class="field-value">JZ10023456</div>
+                                </div>
+                                <div class="address-field">
+                                    <div class="field-label">完整地址</div>
+                                    <div class="field-value">北京市海淀区中关村街道科技园社区中关村科技园B区8号楼2单元15层1502室</div>
+                                </div>
+                                <div class="address-field">
+                                    <div class="field-label">匹配度</div>
+                                    <div class="field-value">100%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div class="system-header">
+                                <div class="system-name">
+                                    <i class="fas fa-fire"></i> 供热系统
+                                </div>
+                                <span class="system-badge badge-heating">供热</span>
+                            </div>
+                            <div class="system-body">
+                                <div class="address-field">
+                                    <div class="field-label">地址ID</div>
+                                    <div class="field-value">GR20058932</div>
+                                </div>
+                                <div class="address-field">
+                                    <div class="field-label">完整地址</div>
+                                    <div class="field-value">北京市海淀区中关村街道中关村社区中关村科技园二区8栋2单元15楼1502</div>
+                                </div>
+                                <div class="address-field">
+                                    <div class="field-label">匹配度</div>
+                                    <div class="field-value">87%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div class="system-header">
+                                <div class="system-name">
+                                    <i class="fas fa-burn"></i> 燃气系统
+                                </div>
+                                <span class="system-badge badge-gas">燃气</span>
+                            </div>
+                            <div class="system-body">
+                                <div class="address-field">
+                                    <div class="field-label">地址ID</div>
+                                    <div class="field-value">RQ30076521</div>
+                                </div>
+                                <div class="address-field">
+                                    <div class="field-label">完整地址</div>
+                                    <div class="field-value">北京市海淀区中关村街道科技园社区委员会中关村科技园8号楼2单元十五层1502号</div>
+                                </div>
+                                <div class="address-field">
+                                    <div class="field-label">匹配度</div>
+                                    <div class="field-value">92%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 审核历史标签页 -->
+                <div class="tab-pane" id="history">
+                    <div class="history-timeline">
+                        <div class="history-item">
+                            <div class="history-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="history-content">
+                                <div class="history-title">创建标准地址</div>
+                                <div class="history-desc">系统管理员创建了该标准地址</div>
+                                <div class="history-date">2025-03-20 09:45:30</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="history-content">
+                                <div class="history-title">修改地址信息</div>
+                                <div class="history-desc">系统管理员修改了小区名称、楼栋号和单元号</div>
+                                <div class="history-date">2025-03-20 10:15:45</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-icon">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <div class="history-content">
+                                <div class="history-title">提交审核</div>
+                                <div class="history-desc">系统管理员提交了审核申请</div>
+                                <div class="history-date">2025-03-20 10:20:12</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="history-content">
+                                <div class="history-title">等待审核</div>
+                                <div class="history-desc">正在等待网格员审核</div>
+                                <div class="history-date">2025-03-20 10:20:12 至今</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后执行初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从URL参数获取地址ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const addressId = urlParams.get('id') || '1001';
+            
+            // 根据地址ID加载地址信息
+            loadAddressDetail(addressId);
+        });
+        
+        // 加载地址详情
+        function loadAddressDetail(addressId) {
+            console.log(`加载地址ID: ${addressId} 的详情`);
+            
+            // 根据地址状态控制按钮显示
+            updateActionButtons('pending');
+        }
+        
+        // 更新操作按钮
+        function updateActionButtons(status) {
+            const actionButtons = document.getElementById('actionButtons');
+            const statusBadge = document.getElementById('addressStatus');
+            
+            // 根据状态显示不同的按钮和状态标签
+            if (status === 'pending') {
+                // 待审核状态，显示审批按钮
+                actionButtons.innerHTML = `
+                    <button class="btn btn-primary" onclick="navigateTo('pending-address-approve.html?id=1001', '审批地址')">
+                        <i class="fas fa-check-circle"></i> 审批
+                    </button>
+                `;
+                
+                statusBadge.className = 'status-pill status-pending';
+                statusBadge.innerHTML = '<i class="fas fa-clock"></i> 待审核';
+                
+                // 显示顶部审批按钮
+                document.getElementById('approveBtn').style.display = 'inline-flex';
+                
+            } else if (status === 'approved') {
+                // 已通过状态，隐藏审批按钮
+                actionButtons.innerHTML = `
+                    <button class="btn btn-default" onclick="navigateTo('address-detail.html?id=1001', '地址详情')">
+                        <i class="fas fa-eye"></i> 查看正式地址
+                    </button>
+                `;
+                
+                statusBadge.className = 'status-pill status-approved';
+                statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> 已通过';
+                
+                // 隐藏顶部审批按钮
+                document.getElementById('approveBtn').style.display = 'none';
+                
+            } else if (status === 'rejected') {
+                // 已拒绝状态，显示重新提交按钮
+                actionButtons.innerHTML = `
+                    <button class="btn btn-default" onclick="navigateTo('edit-address.html?id=1001', '编辑地址')">
+                        <i class="fas fa-edit"></i> 重新编辑
+                    </button>
+                `;
+                
+                statusBadge.className = 'status-pill status-rejected';
+                statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> 已拒绝';
+                
+                // 隐藏顶部审批按钮
+                document.getElementById('approveBtn').style.display = 'none';
+            }
+        }
+        
+        // 切换标签页
+        function switchTab(tabId) {
+            // 隐藏所有标签页内容
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            // 取消选中所有标签
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // 显示选中的标签页内容
+            document.getElementById(tabId).classList.add('active');
+            
+            // 选中对应的标签
+            const currentTabIndex = tabId === 'changes' ? 0 : (tabId === 'relations' ? 1 : 2);
+            tabs[currentTabIndex].classList.add('active');
+        }
+    </script>
+</body>
+</html> 

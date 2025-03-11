@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区详情</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/community.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* 页面增强样式 */
+        .page-header {
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .detail-form {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .detail-form:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .form-section {
+            padding: 24px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-section:hover {
+            background-color: #fafafa;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-left: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            background: #409eff;
+            border-radius: 2px;
+        }
+        
+        .form-control:focus {
+            border-color: #409eff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #f56c6c;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f56c6c' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM7 11.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm.5-8.5a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V3z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px 16px;
+            padding-right: 32px;
+        }
+        
+        .invalid-feedback {
+            display: none;
+            color: #f56c6c;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .form-control.is-invalid + .invalid-feedback {
+            display: block;
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* 加载中状态 */
+        .form-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            display: none;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #409eff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .spinner-text {
+            color: #303133;
+            font-size: 16px;
+        }
+        
+        /* 提示信息 */
+        .tips {
+            color: #909399;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        /* 地图容器 */
+        .map-container {
+            height: 300px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid #dcdfe6;
+        }
+        
+        /* 标签样式 */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .tag {
+            display: flex;
+            align-items: center;
+            padding: 2px 8px;
+            background: #ecf5ff;
+            color: #409eff;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .tag .remove-tag {
+            margin-left: 4px;
+            cursor: pointer;
+            color: #409eff;
+            opacity: 0.6;
+        }
+        
+        .tag .remove-tag:hover {
+            opacity: 1;
+        }
+        
+        .add-tag {
+            padding: 2px 8px;
+            background: #f0f2f5;
+            color: #909399;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .add-tag:hover {
+            background: #e6e8eb;
+            color: #606266;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .page-actions {
+                margin-top: 12px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .map-container {
+                height: 200px;
+            }
+        }
+        
+        /* 成功和错误消息 */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            transform: translateX(calc(100% + 20px));
+            z-index: 1000;
+        }
+        
+        .message.show {
+            transform: translateX(0);
+        }
+        
+        .message.success {
+            background: #f0f9eb;
+            color: #67c23a;
+            border-left: 4px solid #67c23a;
+        }
+        
+        .message.error {
+            background: #fef0f0;
+            color: #f56c6c;
+            border-left: 4px solid #f56c6c;
+        }
+        
+        .message .close {
+            margin-left: 8px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        
+        .message .close:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载中状态 -->
+    <div class="form-loading" id="formLoading">
+        <div class="spinner"></div>
+        <div class="spinner-text">保存中，请稍候...</div>
+    </div>
+    
+    <!-- 消息提示 -->
+    <div class="message success" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <span>保存成功！</span>
+        <i class="fas fa-times close" onclick="hideMessage('successMessage')"></i>
+    </div>
+    
+    <div class="message error" id="errorMessage">
+        <i class="fas fa-times-circle"></i>
+        <span>保存失败，请检查表单！</span>
+        <i class="fas fa-times close" onclick="hideMessage('errorMessage')"></i>
+    </div>
+    
+    <div class="container">
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <i class="fas fa-building"></i> <span id="pageTitle">小区详情</span>
+                </h1>
+                <p class="subtitle">查看和编辑小区详细信息</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-default" onclick="location.href='community-list.html'">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </button>
+                <button class="btn btn-primary" onclick="saveCommunity()">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </div>
+
+        <div class="detail-form">
+            <!-- 基础信息区域 -->
+            <div class="form-section">
+                <h2 class="section-title">基础信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">小区编码<span class="required">*</span></label>
+                        <input type="text" class="form-control" id="communityId" placeholder="请输入小区编码">
+                        <div class="invalid-feedback">请输入小区编码</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">小区名称<span class="required">*</span></label>
+                        <input type="text" class="form-control" id="communityName" placeholder="请输入小区名称">
+                        <div class="invalid-feedback">请输入小区名称</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">小区简称</label>
+                        <input type="text" class="form-control" id="communityShortName" placeholder="请输入小区简称">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">备案名称</label>
+                        <input type="text" class="form-control" id="registeredName" placeholder="请输入备案名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">蓝牌号</label>
+                        <input type="text" class="form-control" id="blueCardNumber" placeholder="请输入蓝牌号">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">建成年份</label>
+                        <input type="number" class="form-control" id="builtYear" placeholder="请输入建成年份">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 位置信息区域 -->
+            <div class="form-section">
+                <h2 class="section-title">位置信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">所属区县<span class="required">*</span></label>
+                        <select class="form-control" id="district">
+                            <option value="">请选择区县</option>
+                            <option value="历下区">历下区</option>
+                            <option value="市中区">市中区</option>
+                            <option value="槐荫区">槐荫区</option>
+                            <option value="天桥区">天桥区</option>
+                            <option value="历城区">历城区</option>
+                        </select>
+                        <div class="invalid-feedback">请选择区县</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">所属街道<span class="required">*</span></label>
+                        <select class="form-control" id="street">
+                            <option value="">请选择街道</option>
+                            <option value="泉城路街道">泉城路街道</option>
+                            <option value="解放路街道">解放路街道</option>
+                            <option value="大明湖街道">大明湖街道</option>
+                            <option value="文化东路街道">文化东路街道</option>
+                        </select>
+                        <div class="invalid-feedback">请选择街道</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">所属社区<span class="required">*</span></label>
+                        <select class="form-control" id="community">
+                            <option value="">请选择社区</option>
+                            <option value="泉城社区">泉城社区</option>
+                            <option value="解放社区">解放社区</option>
+                            <option value="大明湖社区">大明湖社区</option>
+                        </select>
+                        <div class="invalid-feedback">请选择社区</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="form-label">详细地址<span class="required">*</span></label>
+                        <input type="text" class="form-control" id="address" placeholder="请输入详细地址">
+                        <div class="invalid-feedback">请输入详细地址</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">经度</label>
+                        <input type="text" class="form-control" id="longitude" placeholder="经度">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">纬度</label>
+                        <input type="text" class="form-control" id="latitude" placeholder="纬度">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-default form-control" onclick="locateOnMap()">
+                            <i class="fas fa-map-marker-alt"></i> 在地图上定位
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="map-container" id="mapContainer">
+                    <!-- 地图将通过JavaScript加载 -->
+                </div>
+            </div>
+            
+            <!-- 规模信息区域 -->
+            <div class="form-section">
+                <h2 class="section-title">规模信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">占地面积(平方米)</label>
+                        <input type="number" class="form-control" id="landArea" placeholder="请输入占地面积">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">建筑面积(平方米)</label>
+                        <input type="number" class="form-control" id="buildingArea" placeholder="请输入建筑面积">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">绿化面积(平方米)</label>
+                        <input type="number" class="form-control" id="greenArea" placeholder="请输入绿化面积">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">楼栋数量</label>
+                        <input type="number" class="form-control" id="buildingCount" placeholder="请输入楼栋数量">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">住户数量</label>
+                        <input type="number" class="form-control" id="householdCount" placeholder="请输入住户数量">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">停车位数量</label>
+                        <input type="number" class="form-control" id="parkingCount" placeholder="请输入停车位数量">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 物业信息区域 -->
+            <div class="form-section">
+                <h2 class="section-title">物业信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">物业公司</label>
+                        <input type="text" class="form-control" id="propertyCompany" placeholder="请输入物业公司名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">物业联系电话</label>
+                        <input type="text" class="form-control" id="propertyPhone" placeholder="请输入物业联系电话">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">物业费(元/平米/月)</label>
+                        <input type="number" class="form-control" id="propertyFee" placeholder="请输入物业费">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 标签信息区域 -->
+            <div class="form-section">
+                <h2 class="section-title">小区标签</h2>
+                
+                <div class="tags-container" id="tagsContainer">
+                    <div class="tag">
+                        电梯小区
+                        <i class="fas fa-times remove-tag" onclick="removeTag(this)"></i>
+                    </div>
+                    <div class="tag">
+                        绿化好
+                        <i class="fas fa-times remove-tag" onclick="removeTag(this)"></i>
+                    </div>
+                    <div class="tag">
+                        地铁周边
+                        <i class="fas fa-times remove-tag" onclick="removeTag(this)"></i>
+                    </div>
+                    <div class="add-tag" onclick="addNewTag()">
+                        <i class="fas fa-plus"></i> 添加标签
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 备注信息区域 -->
+            <div class="form-section">
+                <h2 class="section-title">备注信息</h2>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <textarea class="form-control" id="remarks" rows="4" placeholder="请输入备注信息"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/community.js"></script>
+    <script>
+        let isEdit = false;
+        let communityId = '';
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取URL中的mode参数，判断是新增还是编辑
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            communityId = urlParams.get('id');
+            
+            if (mode === 'add') {
+                // 新增模式
+                document.getElementById('pageTitle').textContent = '新增小区';
+                isEdit = false;
+            } else if (communityId) {
+                // 编辑模式
+                document.getElementById('pageTitle').textContent = '编辑小区';
+                isEdit = true;
+                loadCommunityData(communityId);
+            } else {
+                // 查看模式
+                document.getElementById('pageTitle').textContent = '小区详情';
+                isEdit = false;
+                if (communityId) {
+                    loadCommunityData(communityId);
+                    // 禁用所有输入框
+                    disableAllInputs();
+                }
+            }
+            
+            // 绑定区县和街道联动
+            document.getElementById('district').addEventListener('change', function() {
+                updateStreetOptions(this.value);
+            });
+            
+            // 绑定街道和社区联动
+            document.getElementById('street').addEventListener('change', function() {
+                updateCommunityOptions(document.getElementById('district').value, this.value);
+            });
+            
+            // 初始化地图
+            initMap();
+        });
+        
+        // 禁用所有输入控件（查看模式）
+        function disableAllInputs() {
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.disabled = true;
+            });
+            
+            // 隐藏保存按钮
+            document.querySelector('.btn-primary').style.display = 'none';
+        }
+        
+        // 加载小区数据
+        function loadCommunityData(id) {
+            // 显示加载状态
+            document.getElementById('formLoading').style.display = 'flex';
+            
+            // 模拟数据加载延迟
+            setTimeout(() => {
+                // 在实际项目中，这里应该调用API获取小区数据
+                // 以下是模拟数据
+                const data = {
+                    id: 'C' + id,
+                    name: '恒大名都',
+                    shortName: '恒大',
+                    registeredName: '恒大名都小区',
+                    blueCardNumber: 'B-1234567',
+                    builtYear: 2010,
+                    district: '历下区',
+                    street: '泉城路街道',
+                    community: '泉城社区',
+                    address: '历下区泉城路街道泉城社区恒大名都小区',
+                    longitude: 117.12345,
+                    latitude: 36.54321,
+                    landArea: 50000,
+                    buildingArea: 120000,
+                    greenArea: 15000,
+                    buildingCount: 12,
+                    householdCount: 1200,
+                    parkingCount: 800,
+                    propertyCompany: '恒大物业管理有限公司',
+                    propertyPhone: '0531-88888888',
+                    propertyFee: 2.5,
+                    remarks: '这是一个高档住宅小区，环境优美，配套设施完善。'
+                };
+                
+                // 填充表单数据
+                fillFormData(data);
+                
+                // 隐藏加载状态
+                document.getElementById('formLoading').style.display = 'none';
+            }, 800);
+        }
+        
+        // 填充表单数据
+        function fillFormData(data) {
+            document.getElementById('communityId').value = data.id;
+            document.getElementById('communityName').value = data.name;
+            document.getElementById('communityShortName').value = data.shortName;
+            document.getElementById('registeredName').value = data.registeredName;
+            document.getElementById('blueCardNumber').value = data.blueCardNumber;
+            document.getElementById('builtYear').value = data.builtYear;
+            document.getElementById('district').value = data.district;
+            document.getElementById('street').value = data.street;
+            document.getElementById('community').value = data.community;
+            document.getElementById('address').value = data.address;
+            document.getElementById('longitude').value = data.longitude;
+            document.getElementById('latitude').value = data.latitude;
+            document.getElementById('landArea').value = data.landArea;
+            document.getElementById('buildingArea').value = data.buildingArea;
+            document.getElementById('greenArea').value = data.greenArea;
+            document.getElementById('buildingCount').value = data.buildingCount;
+            document.getElementById('householdCount').value = data.householdCount;
+            document.getElementById('parkingCount').value = data.parkingCount;
+            document.getElementById('propertyCompany').value = data.propertyCompany;
+            document.getElementById('propertyPhone').value = data.propertyPhone;
+            document.getElementById('propertyFee').value = data.propertyFee;
+            document.getElementById('remarks').value = data.remarks;
+            
+            // 更新地图位置
+            updateMapPosition(data.longitude, data.latitude);
+        }
+        
+        // 更新街道选项
+        function updateStreetOptions(district) {
+            // 实际项目中应该根据选择的区县动态加载街道数据
+            const streetSelect = document.getElementById('street');
+            streetSelect.innerHTML = '<option value="">请选择街道</option>';
+            
+            if (district === '历下区') {
+                addOption(streetSelect, '泉城路街道', '泉城路街道');
+                addOption(streetSelect, '解放路街道', '解放路街道');
+                addOption(streetSelect, '大明湖街道', '大明湖街道');
+            } else if (district === '市中区') {
+                addOption(streetSelect, '舜玉路街道', '舜玉路街道');
+                addOption(streetSelect, '王官庄街道', '王官庄街道');
+            }
+            
+            // 清空社区选择
+            document.getElementById('community').innerHTML = '<option value="">请选择社区</option>';
+        }
+        
+        // 更新社区选项
+        function updateCommunityOptions(district, street) {
+            // 实际项目中应该根据选择的区县和街道动态加载社区数据
+            const communitySelect = document.getElementById('community');
+            communitySelect.innerHTML = '<option value="">请选择社区</option>';
+            
+            if (district === '历下区' && street === '泉城路街道') {
+                addOption(communitySelect, '泉城社区', '泉城社区');
+                addOption(communitySelect, '解放社区', '解放社区');
+            } else if (district === '历下区' && street === '大明湖街道') {
+                addOption(communitySelect, '大明湖社区', '大明湖社区');
+            }
+        }
+        
+        // 辅助函数：添加选择项
+        function addOption(select, value, text) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = text;
+            select.appendChild(option);
+        }
+        
+        // 初始化地图
+        function initMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            // 实际项目中，应该集成地图API，如百度地图、高德地图等
+            // 这里仅作为示例展示地图占位符
+            mapContainer.innerHTML = `
+                <div style="height: 100%; display: flex; justify-content: center; align-items: center; background-color: #f5f7fa; color: #909399;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 32px; margin-bottom: 8px;"></i>
+                        <div>地图加载中...</div>
+                        <div style="font-size: 12px; margin-top: 8px;">实际项目中集成地图API</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 更新地图位置
+        function updateMapPosition(longitude, latitude) {
+            // 实际项目中，应该调用地图API更新标记位置
+            console.log('更新地图位置:', longitude, latitude);
+        }
+        
+        // 在地图上定位
+        function locateOnMap() {
+            const longitude = document.getElementById('longitude').value;
+            const latitude = document.getElementById('latitude').value;
+            
+            if (longitude && latitude) {
+                updateMapPosition(longitude, latitude);
+                showMessage('successMessage', '已在地图上标记位置');
+            } else {
+                showMessage('errorMessage', '请先输入经纬度');
+            }
+        }
+        
+        // 移除标签
+        function removeTag(element) {
+            const tag = element.parentNode;
+            tag.remove();
+        }
+        
+        // 添加新标签
+        function addNewTag() {
+            const tagName = prompt('请输入标签名称');
+            if (tagName && tagName.trim() !== '') {
+                const tagsContainer = document.getElementById('tagsContainer');
+                const addTagButton = document.querySelector('.add-tag');
+                
+                const newTag = document.createElement('div');
+                newTag.className = 'tag';
+                newTag.innerHTML = `
+                    ${tagName.trim()}
+                    <i class="fas fa-times remove-tag" onclick="removeTag(this)"></i>
+                `;
+                
+                tagsContainer.insertBefore(newTag, addTagButton);
+            }
+        }
+        
+        // 验证表单
+        function validateForm() {
+            let isValid = true;
+            
+            // 重置所有验证状态
+            document.querySelectorAll('.form-control').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // 验证必填字段
+            const requiredFields = [
+                { id: 'communityId', name: '小区编码' },
+                { id: 'communityName', name: '小区名称' },
+                { id: 'district', name: '所属区县' },
+                { id: 'street', name: '所属街道' },
+                { id: 'community', name: '所属社区' },
+                { id: 'address', name: '详细地址' }
+            ];
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    element.classList.add('is-invalid');
+                    isValid = false;
+                }
+            });
+            
+            return isValid;
+        }
+        
+        // 保存小区信息
+        function saveCommunity() {
+            // 验证表单
+            if (!validateForm()) {
+                showMessage('errorMessage', '请完善必填信息');
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('formLoading').style.display = 'flex';
+            
+            // 收集表单数据
+            const formData = {
+                id: document.getElementById('communityId').value,
+                name: document.getElementById('communityName').value,
+                shortName: document.getElementById('communityShortName').value,
+                registeredName: document.getElementById('registeredName').value,
+                blueCardNumber: document.getElementById('blueCardNumber').value,
+                builtYear: document.getElementById('builtYear').value,
+                district: document.getElementById('district').value,
+                street: document.getElementById('street').value,
+                community: document.getElementById('community').value,
+                address: document.getElementById('address').value,
+                longitude: document.getElementById('longitude').value,
+                latitude: document.getElementById('latitude').value,
+                landArea: document.getElementById('landArea').value,
+                buildingArea: document.getElementById('buildingArea').value,
+                greenArea: document.getElementById('greenArea').value,
+                buildingCount: document.getElementById('buildingCount').value,
+                householdCount: document.getElementById('householdCount').value,
+                parkingCount: document.getElementById('parkingCount').value,
+                propertyCompany: document.getElementById('propertyCompany').value,
+                propertyPhone: document.getElementById('propertyPhone').value,
+                propertyFee: document.getElementById('propertyFee').value,
+                remarks: document.getElementById('remarks').value,
+                // 收集标签
+                tags: Array.from(document.querySelectorAll('.tag'))
+                    .map(tag => tag.textContent.trim())
+                    .filter(tag => tag !== '')
+            };
+            
+            // 模拟API调用延迟
+            setTimeout(() => {
+                // 这里应该调用API保存数据
+                console.log('保存的数据:', formData);
+                
+                // 隐藏加载状态
+                document.getElementById('formLoading').style.display = 'none';
+                
+                // 显示成功消息
+                showMessage('successMessage', '保存成功');
+                
+                // 如果是新增，则跳转到列表页
+                if (!isEdit) {
+                    setTimeout(() => {
+                        location.href = 'community-list.html';
+                    }, 1500);
+                }
+            }, 1000);
+        }
+        
+        // 显示消息
+        function showMessage(id, text) {
+            const message = document.getElementById(id);
+            if (text) {
+                message.querySelector('span').textContent = text;
+            }
+            message.classList.add('show');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                hideMessage(id);
+            }, 3000);
+        }
+        
+        // 隐藏消息
+        function hideMessage(id) {
+            const message = document.getElementById(id);
+            message.classList.remove('show');
+        }
+    </script>
+</body>
+</html> 

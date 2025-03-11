@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建地址关联 - 用户地址数据系统</title>
+    <link rel="stylesheet" href="relation-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="frame-integration.js"></script>
+    <!-- 添加额外的样式以支持并列布局 -->
+    <style>
+        .systems-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .system-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .search-results-container {
+            height: 320px;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 992px) {
+            .systems-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>创建地址关联</h1>
+                <p class="subtitle">关联住建局、供热系统和燃气系统之间的地址数据</p>
+            </div>
+            <button class="btn btn-default" onclick="window.location.href='address-relation.html'">
+                <i class="fas fa-arrow-left"></i> 返回关联管理
+            </button>
+        </header>
+        
+        <div class="create-form">
+            <div class="form-section">
+                <h3 class="section-title">创建新的地址关联关系</h3>
+                <p class="section-desc">通过以下表单，您可以手动关联住建局、供热系统和燃气系统之间的地址数据。</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>至少需要选择两个系统的地址进行关联。如果有系统没有对应的地址数据，可以留空。</span>
+                </div>
+            </div>
+            
+            <!-- 三个系统地址并列容器 -->
+            <div class="systems-container">
+                <!-- 住建局系统地址 -->
+                <div class="system-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-building"></i> 住建局系统地址
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">地址ID或关键字</label>
+                            <div class="input-with-button">
+                                <input type="text" class="form-control" placeholder="输入地址ID或关键字搜索" id="constructionSearchInput">
+                                <button class="input-btn" onclick="searchConstructionAddresses()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-results-container" id="constructionResults">
+                        <div class="search-results-header">搜索结果</div>
+                        <div class="search-results-body">
+                            <table class="results-table" id="constructionResultsTable">
+                                <thead>
+                                    <tr>
+                                        <th width="40px">选择</th>
+                                        <th>地址</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="radio" name="constructionAddress" value="101"></td>
+                                        <td>山东省济南市市中区经七路街道泉城社区泉城小区12栋3单元8楼802号</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="radio" name="constructionAddress" value="102"></td>
+                                        <td>山东省济南市历下区解放路街道文化东路社区文东花园5号楼2单元11层1102室</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 供热系统地址 -->
+                <div class="system-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-fire"></i> 供热系统地址
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">地址ID或关键字</label>
+                            <div class="input-with-button">
+                                <input type="text" class="form-control" placeholder="输入地址ID或关键字搜索" id="heatingSearchInput">
+                                <button class="input-btn" onclick="searchHeatingAddresses()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-results-container" id="heatingResults">
+                        <div class="search-results-header">搜索结果</div>
+                        <div class="search-results-body">
+                            <table class="results-table" id="heatingResultsTable">
+                                <thead>
+                                    <tr>
+                                        <th width="40px">选择</th>
+                                        <th>地址</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="radio" name="heatingAddress" value="201"></td>
+                                        <td>山东省济南市市中区经七路街道泉城小区12号楼3单元8层802室</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="radio" name="heatingAddress" value="202"></td>
+                                        <td>山东省济南市历下区解放路街道文东花园5栋2单元11楼1102</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 燃气系统地址 -->
+                <div class="system-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-burn"></i> 燃气系统地址
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">地址ID或关键字</label>
+                            <div class="input-with-button">
+                                <input type="text" class="form-control" placeholder="输入地址ID或关键字搜索" id="gasSearchInput">
+                                <button class="input-btn" onclick="searchGasAddresses()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-results-container" id="gasResults">
+                        <div class="search-results-header">搜索结果</div>
+                        <div class="search-results-body">
+                            <table class="results-table" id="gasResultsTable">
+                                <thead>
+                                    <tr>
+                                        <th width="40px">选择</th>
+                                        <th>地址</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="radio" name="gasAddress" value="301"></td>
+                                        <td>山东省济南市市中区经七路街道泉城社区泉城小区12号楼3单元8楼802号</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="radio" name="gasAddress" value="302"></td>
+                                        <td>山东省济南市历下区解放路街道文化东路社区文东花园5号楼2单元11层1102号</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4 class="section-title">
+                    <i class="fas fa-cogs"></i> 关联设置
+                </h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">关联说明 (选填)</label>
+                        <textarea class="form-control" rows="3" placeholder="输入关联说明信息，例如：根据XX部门要求关联" id="relationDescription"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button class="btn btn-default" onclick="window.location.href='address-relation.html'">取消</button>
+                <button class="btn btn-primary" onclick="createRelation()">
+                    <i class="fas fa-link"></i> 创建关联关系
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 成功提示模态框 -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>操作成功</h4>
+                <span class="close" onclick="closeModal('successModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <p>地址关联关系创建成功！</p>
+                <p>关联ID: <span id="newRelationId" class="highlight-text">R20240101001</span></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="window.location.href='address-relation.html'">返回关联管理</button>
+                <button class="btn btn-default" onclick="window.location.href='address-detail.html?id=1&relation=R20240101001'">查看详情</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="relation-scripts.js"></script>
+</body>
+</html>

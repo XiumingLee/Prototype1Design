@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地址详情 - 用户地址数据系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 15px;
+            gap: 5px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .nav-links {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-links a:hover {
+            border-bottom-color: #3498db;
+        }
+        
+        .nav-links a.active {
+            font-weight: 500;
+            border-bottom-color: #3498db;
+        }
+        
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 992px) {
+            .detail-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .detail-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #2c3e50;
+            flex: 1;
+        }
+        
+        .system-badge {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .badge-standard {
+            background-color: #3498db;
+        }
+        
+        .badge-user {
+            background-color: #9b59b6;
+        }
+        
+        .badge-heating {
+            background-color: #f39c12;
+        }
+        
+        .badge-gas {
+            background-color: #2ecc71;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .info-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 992px) {
+            .info-group {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .info-group {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            color: #34495e;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .primary-button {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .primary-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .secondary-button {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .secondary-button:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .full-address {
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            line-height: 1.5;
+        }
+        
+        .address-icon {
+            margin-right: 10px;
+            color: #3498db;
+            font-size: 24px;
+        }
+        
+        .meter-section {
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .meter-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .meter-info {
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .page-nav {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            padding: 15px 10px;
+            z-index: 100;
+            gap: 10px;
+        }
+        
+        .page-nav-item {
+            display: flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        .page-nav-item:hover {
+            background-color: #e8f4fc;
+        }
+        
+        .page-nav-item i {
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .page-nav {
+                right: 10px;
+                padding: 10px 5px;
+            }
+            
+            .page-nav-item {
+                padding: 8px;
+            }
+            
+            .page-nav-item span {
+                display: none;
+            }
+            
+            .page-nav-item i {
+                font-size: 20px;
+            }
+        }
+        
+        /* 为页面锚点添加平滑滚动效果 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 解决固定标题时的锚点定位问题 */
+        .detail-card {
+            scroll-margin-top: 20px;
+        }
+        
+        .map-container {
+            height: 300px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .map-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .map-overlay {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(255,255,255,0.95);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .map-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .map-button {
+            background-color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        
+        .map-button:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .coordinate-info {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>地址详情</h1>
+                <p class="subtitle">查看用户地址的完整信息</p>
+            </div>
+            <a href="address-list.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> 返回地址列表
+            </a>
+        </header>
+        
+        <div class="full-address">
+            <i class="fas fa-map-marker-alt address-icon"></i>
+            <span id="fullAddressText">山东省济南市历下区泉城路街道泉城社区恒大名都8号楼2单元15层1502室</span>
+        </div>
+        
+        <!-- 修改页面导航，添加两个新的导航项 -->
+        <div class="page-nav">
+            <a href="#addressInfo" class="page-nav-item">
+                <i class="fas fa-map-marked-alt"></i> <span>标准地址信息</span>
+            </a>
+            <a href="#userInfo" class="page-nav-item">
+                <i class="fas fa-user"></i> <span>用户信息</span>
+            </a>
+            <a href="#heatingInfo" class="page-nav-item">
+                <i class="fas fa-fire"></i> <span>供热系统信息</span>
+            </a>
+            <a href="#gasInfo" class="page-nav-item">
+                <i class="fas fa-burn"></i> <span>燃气系统信息</span>
+            </a>
+            <a href="#gridOfficerInfo" class="page-nav-item">
+                <i class="fas fa-id-card"></i> <span>网格员信息</span>
+            </a>
+            <a href="#auditRecordInfo" class="page-nav-item">
+                <i class="fas fa-history"></i> <span>审核记录</span>
+            </a>
+        </div>
+        
+        <div class="detail-content">
+            <div class="detail-card" id="addressInfo">
+                <div class="card-header">
+                    <div class="card-title">标准地址信息</div>
+                    <span class="system-badge badge-standard">标准</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-group">
+                        <div class="info-item">
+                            <span class="info-label">省份</span>
+                            <div class="info-value" id="province">山东省</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">城市</span>
+                            <div class="info-value" id="city">济南市</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">区县</span>
+                            <div class="info-value" id="district">历下区</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">街道</span>
+                            <div class="info-value" id="street">泉城路街道</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">委员会</span>
+                            <div class="info-value" id="committee">泉城社区</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">小区</span>
+                            <div class="info-value" id="community">恒大名都</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">楼栋</span>
+                            <div class="info-value" id="building">8号楼</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">单元</span>
+                            <div class="info-value" id="unit">2单元</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">楼层</span>
+                            <div class="info-value" id="floor">15层</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">门牌号</span>
+                            <div class="info-value" id="room">1502室</div>
+                        </div>
+                        <div class="info-item full-width">
+                            <span class="info-label">地址来源</span>
+                            <div class="info-value" id="source">住建局、供热系统、燃气系统 (已标准化整合)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="map-container">
+                        <img src="https://api.map.baidu.com/staticimage/v2?ak=1NINMUrpbhQQnmgRMaeDCQ9WtCBOX4WG&width=1000&height=1000&center=117.021,36.6512&zoom=18&markers=117.021,36.6512" 
+                             alt="地址位置地图" class="map-image">
+                        <div class="map-overlay">
+                            <div class="coordinate-info">
+                                <div><i class="fas fa-map-marker-alt"></i> <strong>经度：</strong>117.021</div>
+                                <div><i class="fas fa-map-marker-alt"></i> <strong>纬度：</strong>36.6512</div>
+                            </div>
+                        </div>
+                        <div class="map-actions">
+                            <button class="map-button" onclick="showFullMap()">
+                                <i class="fas fa-expand"></i> 查看大图
+                            </button>
+                            <button class="map-button" onclick="openInBaiduMaps()">
+                                <i class="fas fa-location-arrow"></i> 导航
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-button primary-button" onclick="location.href='index.html?id=1'">
+                            <i class="fas fa-random"></i> 比对地址
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-card" id="userInfo">
+                <div class="card-header">
+                    <div class="card-title">用户信息</div>
+                    <span class="system-badge badge-user">用户</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-group">
+                        <div class="info-item">
+                            <span class="info-label">用户姓名</span>
+                            <div class="info-value">张三</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">联系电话</span>
+                            <div class="info-value">138****5678</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">证件类型</span>
+                            <div class="info-value">身份证</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">证件号码</span>
+                            <div class="info-value">110********1234</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">房屋性质</span>
+                            <div class="info-value">商品房</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">建筑面积</span>
+                            <div class="info-value">120 m²</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">入住时间</span>
+                            <div class="info-value">2020-08-15</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">户籍人口</span>
+                            <div class="info-value">3人</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-card" id="heatingInfo">
+                <div class="card-header">
+                    <div class="card-title">供热系统信息</div>
+                    <span class="system-badge badge-heating">供热</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-group">
+                        <div class="info-item">
+                            <span class="info-label">供热用户号</span>
+                            <div class="info-value">HR2023120578</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">供热面积</span>
+                            <div class="info-value">116.5 m²</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">供热方式</span>
+                            <div class="info-value">集中供热</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">供热站点</span>
+                            <div class="info-value">中关村第二供热站</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">供热区域</span>
+                            <div class="info-value">海淀北部区域</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">缴费状态</span>
+                            <div class="info-value"><span style="color: #27ae60;">■</span> 已缴费</div>
+                        </div>
+                    </div>
+                    
+                    <div class="meter-section">
+                        <h4 class="meter-title">热量表信息</h4>
+                        <div class="meter-info">
+                            <div class="info-group">
+                                <div class="info-item">
+                                    <span class="info-label">热量表号</span>
+                                    <div class="info-value">HB2023587912</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">最近读数</span>
+                                    <div class="info-value">185.63 GJ</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">读表日期</span>
+                                    <div class="info-value">2023-11-25</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">表具状态</span>
+                                    <div class="info-value">正常</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-card" id="gasInfo">
+                <div class="card-header">
+                    <div class="card-title">燃气系统信息</div>
+                    <span class="system-badge badge-gas">燃气</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-group">
+                        <div class="info-item">
+                            <span class="info-label">燃气用户号</span>
+                            <div class="info-value">GS2023458752</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">用气类型</span>
+                            <div class="info-value">民用</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">用气设备</span>
+                            <div class="info-value">灶具, 热水器</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">供气区域</span>
+                            <div class="info-value">海淀中心区</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">安装日期</span>
+                            <div class="info-value">2020-10-08</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">缴费状态</span>
+                            <div class="info-value"><span style="color: #27ae60;">■</span> 已缴费</div>
+                        </div>
+                    </div>
+                    
+                    <div class="meter-section">
+                        <h4 class="meter-title">燃气表信息</h4>
+                        <div class="meter-info">
+                            <div class="info-group">
+                                <div class="info-item">
+                                    <span class="info-label">燃气表号</span>
+                                    <div class="info-value">GB2023156845</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">最近读数</span>
+                                    <div class="info-value">583.2 m³</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">读表日期</span>
+                                    <div class="info-value">2023-12-02</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">表具状态</span>
+                                    <div class="info-value">正常</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="meter-section">
+                        <h4 class="meter-title">安全检查记录</h4>
+                        <div class="meter-info">
+                            <div class="info-group">
+                                <div class="info-item">
+                                    <span class="info-label">最近检查日期</span>
+                                    <div class="info-value">2023-09-15</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">检查结果</span>
+                                    <div class="info-value">合格</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">下次检查日期</span>
+                                    <div class="info-value">2024-03-15</div>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">检查人员</span>
+                                    <div class="info-value">李工</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 在燃气系统信息卡片后添加网格员信息卡片 -->
+            <div class="detail-card" id="gridOfficerInfo">
+                <div class="card-header">
+                    <div class="card-title">网格员信息</div>
+                    <span class="system-badge" style="background-color: #1abc9c;">网格员</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-group">
+                        <div class="info-item">
+                            <span class="info-label">网格员姓名</span>
+                            <div class="info-value">王明</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">联系电话</span>
+                            <div class="info-value">139****4567</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">所属街道</span>
+                            <div class="info-value">泉城路街道</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">负责网格</span>
+                            <div class="info-value">泉城社区第三网格</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">网格代码</span>
+                            <div class="info-value">SD-JN-LX-QCL-03</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工作时间</span>
+                            <div class="info-value">周一至周五 8:30-17:30</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">覆盖小区</span>
+                            <div class="info-value">恒大名都、阳光花园、泉城小区</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">覆盖户数</span>
+                            <div class="info-value">586户</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-button primary-button" onclick="contactGridOfficer()">
+                            <i class="fas fa-phone"></i> 联系网格员
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加审核记录信息卡片 -->
+            <div class="detail-card" id="auditRecordInfo">
+                <div class="card-header">
+                    <div class="card-title">审核记录</div>
+                    <span class="system-badge" style="background-color: #e74c3c;">审核</span>
+                </div>
+                <div class="card-body">
+                    <div class="meter-section" style="margin-top: 0; border-top: none; padding-top: 0;">
+                        <div class="meter-info">
+                            <div class="info-group">
+                                <div class="info-item full-width">
+                                    <span class="info-label">最新审核状态</span>
+                                    <div class="info-value"><span style="color: #27ae60;">■</span> 审核通过</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 审核历史记录表格 -->
+                    <h4 class="meter-title" style="margin-top: 20px;">审核历史记录</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa; border-bottom: 2px solid #eee;">
+                                <th style="padding: 12px 15px; text-align: left;">审核时间</th>
+                                <th style="padding: 12px 15px; text-align: left;">审核人</th>
+                                <th style="padding: 12px 15px; text-align: left;">审核类型</th>
+                                <th style="padding: 12px 15px; text-align: left;">审核结果</th>
+                                <th style="padding: 12px 15px; text-align: left;">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px 15px;">2023-12-15 14:23</td>
+                                <td style="padding: 12px 15px;">李主任</td>
+                                <td style="padding: 12px 15px;">地址标准化验证</td>
+                                <td style="padding: 12px 15px;"><span style="color: #27ae60;">通过</span></td>
+                                <td style="padding: 12px 15px;">地址信息完整准确</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px 15px;">2023-11-20 09:45</td>
+                                <td style="padding: 12px 15px;">张经理</td>
+                                <td style="padding: 12px 15px;">用户信息核实</td>
+                                <td style="padding: 12px 15px;"><span style="color: #27ae60;">通过</span></td>
+                                <td style="padding: 12px 15px;">用户身份已验证</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px 15px;">2023-10-05 16:12</td>
+                                <td style="padding: 12px 15px;">王网格员</td>
+                                <td style="padding: 12px 15px;">地址现场核查</td>
+                                <td style="padding: 12px 15px;"><span style="color: #e74c3c;">需修改</span></td>
+                                <td style="padding: 12px 15px;">门牌号有误，已更正</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px 15px;">2023-09-18 10:30</td>
+                                <td style="padding: 12px 15px;">刘审核员</td>
+                                <td style="padding: 12px 15px;">初始录入审核</td>
+                                <td style="padding: 12px 15px;"><span style="color: #f39c12;">待补充</span></td>
+                                <td style="padding: 12px 15px;">缺少房屋面积信息</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="action-buttons">
+                        <button class="action-button secondary-button" onclick="showAllAuditRecords()">
+                            <i class="fas fa-list"></i> 查看全部记录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时处理URL参数
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从URL获取ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const addressId = urlParams.get('id');
+            
+            // 如果有ID，可以加载该ID对应的数据
+            if (addressId) {
+                loadAddressDetails(addressId);
+            }
+        });
+        
+        // 加载地址详情
+        function loadAddressDetails(id) {
+            // 实际应用中，这里应该是从服务器获取数据
+            // 由于是演示，我们使用硬编码的数据
+            console.log(`加载ID为 ${id} 的地址详情`);
+            
+            // 这里可以通过AJAX请求从服务器获取数据
+            // 或者针对特定ID返回不同的模拟数据
+        }
+
+        function showFullMap() {
+            // 创建模态框
+            const mapModal = document.createElement('div');
+            mapModal.className = 'modal';
+            mapModal.id = 'mapModal';
+            mapModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+            
+            mapModal.innerHTML = `
+                <div style="background: white; width: 90%; max-width: 1000px; border-radius: 8px; overflow: hidden;">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin: 0;">地址位置地图</h4>
+                        <button onclick="closeModal('mapModal')" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+                    </div>
+                    <div style="height: 600px; position: relative;">
+                        <img src="https://api.map.baidu.com/staticimage/v2?ak=1NINMUrpbhQQnmgRMaeDCQ9WtCBOX4WG&width=1000&height=1000&center=117.021,36.6512&zoom=18&markers=117.021,36.6512" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        <div class="map-overlay" style="bottom: 20px; right: 20px;">
+                            <div class="coordinate-info">
+                                <div><i class="fas fa-map-marker-alt"></i> <strong>经度：</strong>117.021</div>
+                                <div><i class="fas fa-map-marker-alt"></i> <strong>纬度：</strong>36.6512</div>
+                            </div>
+                            <div style="margin-top: 5px; color: #666;">
+                                <i class="fas fa-map-pin"></i> ${document.getElementById('fullAddressText').textContent}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(mapModal);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openInBaiduMaps() {
+            const latitude = 36.6512;
+            const longitude = 117.021;
+            const address = encodeURIComponent(document.getElementById('fullAddressText').textContent);
+            window.open(`https://api.map.baidu.com/marker?location=${latitude},${longitude}&title=${address}&content=${address}&output=html`);
+        }
+
+        function contactGridOfficer() {
+            alert('即将拨打网格员电话：139****4567');
+            // 实际应用中可以触发拨号或发送消息等功能
+        }
+        
+        function showAllAuditRecords() {
+            // 创建模态框显示所有审核记录
+            const auditModal = document.createElement('div');
+            auditModal.className = 'modal';
+            auditModal.id = 'auditModal';
+            auditModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+            
+            auditModal.innerHTML = `
+                <div style="background: white; width: 90%; max-width: 1000px; border-radius: 8px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin: 0;">完整审核历史记录</h4>
+                        <button onclick="closeModal('auditModal')" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+                    </div>
+                    <div style="overflow-y: auto; padding: 20px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa; border-bottom: 2px solid #eee;">
+                                    <th style="padding: 12px 15px; text-align: left;">审核时间</th>
+                                    <th style="padding: 12px 15px; text-align: left;">审核人</th>
+                                    <th style="padding: 12px 15px; text-align: left;">审核类型</th>
+                                    <th style="padding: 12px 15px; text-align: left;">审核结果</th>
+                                    <th style="padding: 12px 15px; text-align: left;">备注</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 12px 15px;">2023-12-15 14:23</td>
+                                    <td style="padding: 12px 15px;">李主任</td>
+                                    <td style="padding: 12px 15px;">地址标准化验证</td>
+                                    <td style="padding: 12px 15px;"><span style="color: #27ae60;">通过</span></td>
+                                    <td style="padding: 12px 15px;">地址信息完整准确</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 12px 15px;">2023-11-20 09:45</td>
+                                    <td style="padding: 12px 15px;">张经理</td>
+                                    <td style="padding: 12px 15px;">用户信息核实</td>
+                                    <td style="padding: 12px 15px;"><span style="color: #27ae60;">通过</span></td>
+                                    <td style="padding: 12px 15px;">用户身份已验证</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 12px 15px;">2023-10-05 16:12</td>
+                                    <td style="padding: 12px 15px;">王网格员</td>
+                                    <td style="padding: 12px 15px;">地址现场核查</td>
+                                    <td style="padding: 12px 15px;"><span style="color: #e74c3c;">需修改</span></td>
+                                    <td style="padding: 12px 15px;">门牌号有误，已更正</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 12px 15px;">2023-09-18 10:30</td>
+                                    <td style="padding: 12px 15px;">刘审核员</td>
+                                    <td style="padding: 12px 15px;">初始录入审核</td>
+                                    <td style="padding: 12px 15px;"><span style="color: #f39c12;">待补充</span></td>
+                                    <td style="padding: 12px 15px;">缺少房屋面积信息</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 12px 15px;">2023-09-10 08:55</td>
+                                    <td style="padding: 12px 15px;">赵数据员</td>
+                                    <td style="padding: 12px 15px;">数据录入</td>
+                                    <td style="padding: 12px 15px;"><span style="color: #3498db;">已录入</span></td>
+                                    <td style="padding: 12px 15px;">初始地址数据录入系统</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(auditModal);
+            document.body.style.overflow = 'hidden';
+        }
+    </script>
+</body>
+</html> 

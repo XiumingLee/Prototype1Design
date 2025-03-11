@@ -1,0 +1,14 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.tabWidth": 2,
+  "prettier.singleQuote": true,
+  "prettier.semi": true,
+  "editor.wordWrap": "on",
+  "editor.fontLigatures": true,
+  "workbench.colorTheme": "GitHub Light",
+  "editor.fontFamily": "'Fira Code', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  }
+} 

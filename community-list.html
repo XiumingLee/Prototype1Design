@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区数据维护</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/community.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* 页面增强样式 */
+        .page-header {
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .filter-section {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-section:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-grid {
+            transition: all 0.3s ease;
+        }
+        
+        .data-grid:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* 表格排序指示器 */
+        .sortable {
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .sortable:after {
+            content: '\f0dc';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            margin-left: 5px;
+            color: #ccc;
+        }
+        
+        .sort-asc:after {
+            content: '\f0de';
+            color: #3498db;
+        }
+        
+        .sort-desc:after {
+            content: '\f0dd';
+            color: #3498db;
+        }
+        
+        /* 表格无数据状态 */
+        .no-data {
+            text-align: center;
+            padding: 40px 0;
+            color: #909399;
+        }
+        
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+        
+        .no-data-text {
+            font-size: 16px;
+        }
+        
+        /* 加载状态 */
+        .data-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            display: none;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 改进的操作按钮 */
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* 改进的分页样式 */
+        .pagination {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .filter-buttons {
+                justify-content: space-between;
+                margin-top: 15px;
+            }
+            
+            .data-grid {
+                overflow-x: auto;
+            }
+            
+            .page-actions {
+                margin-top: 10px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <i class="fas fa-building"></i> 小区数据维护
+                </h1>
+                <p class="subtitle">管理和维护小区基础数据信息</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="location.href='community-detail.html?mode=add'">
+                    <i class="fas fa-plus"></i> 新增小区
+                </button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">区县</label>
+                    <select class="filter-select" id="districtFilter">
+                        <option value="">全部</option>
+                        <option value="历下区">历下区</option>
+                        <option value="市中区">市中区</option>
+                        <option value="槐荫区">槐荫区</option>
+                        <option value="天桥区">天桥区</option>
+                        <option value="历城区">历城区</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">街道</label>
+                    <select class="filter-select" id="streetFilter">
+                        <option value="">全部</option>
+                        <option value="泉城路街道">泉城路街道</option>
+                        <option value="解放路街道">解放路街道</option>
+                        <option value="大明湖街道">大明湖街道</option>
+                        <option value="文化东路街道">文化东路街道</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">社区</label>
+                    <select class="filter-select" id="communityFilter">
+                        <option value="">全部</option>
+                        <option value="泉城社区">泉城社区</option>
+                        <option value="解放社区">解放社区</option>
+                        <option value="大明湖社区">大明湖社区</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">小区名称</label>
+                    <input type="text" class="filter-input" id="nameFilter" placeholder="请输入小区名称">
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <button class="btn btn-default" onclick="resetFilters()">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </div>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="data-grid" style="position: relative;">
+            <!-- 加载状态指示器 -->
+            <div class="data-loading" id="tableLoading">
+                <div class="spinner"></div>
+            </div>
+            
+            <table class="community-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable('number')">序号</th>
+                        <th class="sortable" onclick="sortTable('id')">小区编码</th>
+                        <th class="sortable" onclick="sortTable('name')">小区名称</th>
+                        <th class="sortable" onclick="sortTable('shortName')">小区简称</th>
+                        <th class="sortable" onclick="sortTable('registeredName')">备案名称</th>
+                        <th class="sortable" onclick="sortTable('district')">所属区县</th>
+                        <th class="sortable" onclick="sortTable('street')">所属街道</th>
+                        <th class="sortable" onclick="sortTable('community')">所属社区</th>
+                        <th class="sortable" onclick="sortTable('blueCardNumber')">蓝牌号</th>
+                        <th class="sortable" onclick="sortTable('updateTime')">更新时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="communityTableBody">
+                    <!-- 表格内容由 JavaScript 动态生成 -->
+                </tbody>
+            </table>
+            
+            <!-- 无数据状态 -->
+            <div class="no-data" id="noDataMessage" style="display: none;">
+                <i class="fas fa-folder-open"></i>
+                <div class="no-data-text">暂无数据</div>
+                <div class="no-data-hint">您可以尝试修改筛选条件或添加新的小区</div>
+            </div>
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="pagination">
+            <button class="page-btn" onclick="changePage(1)">首页</button>
+            <button class="page-btn" onclick="changePage(currentPage - 1)">上一页</button>
+            <span class="page-info">第 <span id="currentPage">1</span>/<span id="totalPages">10</span> 页</span>
+            <button class="page-btn" onclick="changePage(currentPage + 1)">下一页</button>
+            <button class="page-btn" onclick="changePage(totalPages)">末页</button>
+        </div>
+    </div>
+
+    <script src="js/community.js"></script>
+    <script>
+        // 添加表格排序功能
+        let currentSortColumn = '';
+        let sortDirection = 'asc';
+        
+        function sortTable(column) {
+            // 先清除所有排序指示
+            document.querySelectorAll('.sortable').forEach(el => {
+                el.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // 确定排序方向
+            if (currentSortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            // 添加排序指示
+            const th = event.currentTarget;
+            th.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+            
+            // 显示加载指示器
+            document.getElementById('tableLoading').style.display = 'flex';
+            
+            // 模拟延迟，替代实际排序操作
+            setTimeout(() => {
+                // 这里应该是实际的排序逻辑
+                // 在实际项目中，你需要实现根据列和方向排序数据的逻辑
+                
+                // 隐藏加载指示器
+                document.getElementById('tableLoading').style.display = 'none';
+            }, 500);
+        }
+        
+        // 扩展原有的渲染函数，添加空数据处理
+        const originalRenderFunction = window.renderCommunityList;
+        window.renderCommunityList = function(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('communityTableBody').innerHTML = '';
+                document.getElementById('noDataMessage').style.display = 'block';
+            } else {
+                document.getElementById('noDataMessage').style.display = 'none';
+                originalRenderFunction(data);
+            }
+        };
+        
+        // 模拟加载过程
+        document.addEventListener('DOMContentLoaded', function() {
+            // 显示加载状态
+            document.getElementById('tableLoading').style.display = 'flex';
+            
+            // 模拟延迟加载
+            setTimeout(() => {
+                document.getElementById('tableLoading').style.display = 'none';
+            }, 800);
+        });
+    </script>
+</body>
+</html> 
