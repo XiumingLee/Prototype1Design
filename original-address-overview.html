@@ -641,7 +641,7 @@
                         </div>
                     </div>
                     <div class="system-card-actions">
-                        <button class="btn btn-primary" onclick="navigateTo(`original-address-construction.html`, '住建局原始数据')">
+                        <button class="btn btn-primary" onclick="viewConstructionDetails()">
                             <i class="fas fa-list"></i> 查看详情
                         </button>
                     
@@ -682,7 +682,7 @@
                         </div>
                     </div>
                     <div class="system-card-actions">
-                        <button class="btn btn-primary" onclick="navigateTo('original-address-heating.html', '供热系统原始数据')">
+                        <button class="btn btn-primary" onclick="viewHeatingDetails()">
                             <i class="fas fa-list"></i> 查看详情
                         </button>
                     </div>
@@ -722,7 +722,7 @@
                         </div>
                     </div>
                     <div class="system-card-actions">
-                        <button class="btn btn-primary" onclick="navigateTo('original-address-gas.html', '燃气系统原始数据')">
+                        <button class="btn btn-primary" onclick="viewGasDetails()">
                             <i class="fas fa-list"></i> 查看详情
                         </button>
                     </div>
@@ -1092,6 +1092,19 @@
             
             chart.setOption(option);
             window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 在脚本部分添加这些函数
+        function viewConstructionDetails() {
+            window.location.href = 'original-address-construction.html';
+        }
+
+        function viewHeatingDetails() {
+            window.location.href = 'original-address-heating.html';
+        }
+
+        function viewGasDetails() {
+            window.location.href = 'original-address-gas.html';
         }
     </script>
 </body>

@@ -634,7 +634,7 @@
                                 <td>86</td>
                                 <td>张网格</td>
                                 <td>
-                                    <button class="action-btn btn-view" onclick="navigateToCommunity('101')">查看</button>
+                                    <button class="action-btn btn-view" onclick="viewCommunity('101')">查看</button>
                                 </td>
                             </tr>
                             <tr>
@@ -644,7 +644,7 @@
                                 <td>56</td>
                                 <td>张网格</td>
                                 <td>
-                                    <button class="action-btn btn-view" onclick="navigateToCommunity('102')">查看</button>
+                                    <button class="action-btn btn-view" onclick="viewCommunity('102')">查看</button>
                                 </td>
                             </tr>
                             <tr>
@@ -654,7 +654,7 @@
                                 <td>42</td>
                                 <td>李审核</td>
                                 <td>
-                                    <button class="action-btn btn-view" onclick="navigateToCommunity('103')">查看</button>
+                                    <button class="action-btn btn-view" onclick="viewCommunity('103')">查看</button>
                                 </td>
                             </tr>
                             <tr>
@@ -664,7 +664,7 @@
                                 <td>35</td>
                                 <td>李审核</td>
                                 <td>
-                                    <button class="action-btn btn-view" onclick="navigateToCommunity('104')">查看</button>
+                                    <button class="action-btn btn-view" onclick="viewCommunity('104')">查看</button>
                                 </td>
                             </tr>
                             <tr>
@@ -674,7 +674,7 @@
                                 <td>24</td>
                                 <td>王地址</td>
                                 <td>
-                                    <button class="action-btn btn-view" onclick="navigateToCommunity('105')">查看</button>
+                                    <button class="action-btn btn-view" onclick="viewCommunity('105')">查看</button>
                                 </td>
                             </tr>
                             <tr>
@@ -684,7 +684,7 @@
                                 <td>18</td>
                                 <td>王地址</td>
                                 <td>
-                                    <button class="action-btn btn-view" onclick="navigateToCommunity('106')">查看</button>
+                                    <button class="action-btn btn-view" onclick="viewCommunity('106')">查看</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -966,6 +966,11 @@
         // 修改查看地址详情的跳转方式
         function viewAddressDetail(addressId) {
             window.location.href = 'pending-address-detail.html?id=' + addressId;
+        }
+
+        // 在脚本部分添加这个函数
+        function viewCommunity(communityId) {
+            window.location.href = 'community-detail.html?id=' + communityId;
         }
     </script>
 </body>

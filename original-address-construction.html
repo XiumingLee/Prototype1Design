@@ -353,7 +353,7 @@
                 <p class="subtitle">查看和管理住建局系统的原始地址数据</p>
             </div>
             <div class="buttons-group">
-                <button class="btn btn-default" onclick="navigateTo('original-address-overview.html', '原始地址数据概览')">
+                <button class="btn btn-default" onclick="backToOverview()">
                     <i class="fas fa-arrow-left"></i> 返回概览
                 </button>
             </div>
@@ -982,6 +982,11 @@
                     row.insertBefore(provinceCell, cells[1]);
                 }
             });
+        }
+
+        // 在脚本部分添加/修改这个函数
+        function backToOverview() {
+            window.location.href = 'original-address-overview.html';
         }
     </script>
 </body>
