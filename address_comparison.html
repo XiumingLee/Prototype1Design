@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户地址数据比对系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .card-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .system-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .system-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .standard-card {
+            flex: 1;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .system-badge {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .badge-construction {
+            background-color: #e74c3c;
+        }
+        
+        .badge-heating {
+            background-color: #f39c12;
+        }
+        
+        .badge-gas {
+            background-color: #2ecc71;
+        }
+        
+        .badge-standard {
+            background-color: #3498db;
+        }
+        
+        .address-field {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .field-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .field-value {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 15px;
+            min-height: 40px;
+        }
+        
+        .standard-field-value {
+            background-color: #e8f4fc;
+            font-weight: 500;
+        }
+        
+        .select-btn {
+            position: absolute;
+            right: 10px;
+            top: 32px;
+            background: #3498db;
+            border: none;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .address-field:hover .select-btn {
+            opacity: 1;
+        }
+        
+        .different {
+            background-color: #ffeded;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .selected {
+            background-color: #e8f6ed;
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .summary {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .summary-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .differences-count {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>用户地址数据比对系统</h1>
+            <p class="subtitle">对比住建局、供热系统和燃气系统的用户地址数据，选择标准地址</p>
+        </header>
+        
+        <div class="summary">
+            <div class="summary-title">地址比对摘要</div>
+            <p>共发现 <span class="differences-count">8</span> 项差异，请点击任意字段右侧的"选择"按钮以设置标准地址</p>
+        </div>
+        
+        <div class="card-container">
+            <!-- 住建局卡片 -->
+            <div class="system-card">
+                <div class="card-header">
+                    <div class="card-title">住建局系统</div>
+                    <span class="system-badge badge-construction">住建</span>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">省份</span>
+                    <div class="field-value">山东省</div>
+                    <button class="select-btn" onclick="selectField('province', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">城市</span>
+                    <div class="field-value">济南市</div>
+                    <button class="select-btn" onclick="selectField('city', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">区县</span>
+                    <div class="field-value">历下区</div>
+                    <button class="select-btn" onclick="selectField('district', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">街道</span>
+                    <div class="field-value">解放路街道</div>
+                    <button class="select-btn" onclick="selectField('street', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">委员会</span>
+                    <div class="field-value">文化东路社区</div>
+                    <button class="select-btn" onclick="selectField('committee', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">小区</span>
+                    <div class="field-value different">文东花园A区</div>
+                    <button class="select-btn" onclick="selectField('community', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼栋</span>
+                    <div class="field-value">8号楼</div>
+                    <button class="select-btn" onclick="selectField('building', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">单元</span>
+                    <div class="field-value">2单元</div>
+                    <button class="select-btn" onclick="selectField('unit', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼层</span>
+                    <div class="field-value different">15层</div>
+                    <button class="select-btn" onclick="selectField('floor', 'construction')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">门牌号</span>
+                    <div class="field-value">1502室</div>
+                    <button class="select-btn" onclick="selectField('room', 'construction')">选择</button>
+                </div>
+            </div>
+            
+            <!-- 供热系统卡片 -->
+            <div class="system-card">
+                <div class="card-header">
+                    <div class="card-title">供热系统</div>
+                    <span class="system-badge badge-heating">供热</span>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">省份</span>
+                    <div class="field-value">山东省</div>
+                    <button class="select-btn" onclick="selectField('province', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">城市</span>
+                    <div class="field-value">济南市</div>
+                    <button class="select-btn" onclick="selectField('city', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">区县</span>
+                    <div class="field-value">历下区</div>
+                    <button class="select-btn" onclick="selectField('district', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">街道</span>
+                    <div class="field-value">解放路街道</div>
+                    <button class="select-btn" onclick="selectField('street', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">委员会</span>
+                    <div class="field-value different">文化东路社区居委会</div>
+                    <button class="select-btn" onclick="selectField('committee', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">小区</span>
+                    <div class="field-value different">文东花园一区</div>
+                    <button class="select-btn" onclick="selectField('community', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼栋</span>
+                    <div class="field-value different">8栋</div>
+                    <button class="select-btn" onclick="selectField('building', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">单元</span>
+                    <div class="field-value">2单元</div>
+                    <button class="select-btn" onclick="selectField('unit', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼层</span>
+                    <div class="field-value">15楼</div>
+                    <button class="select-btn" onclick="selectField('floor', 'heating')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">门牌号</span>
+                    <div class="field-value">1502</div>
+                    <button class="select-btn" onclick="selectField('room', 'heating')">选择</button>
+                </div>
+            </div>
+            
+            <!-- 燃气系统卡片 -->
+            <div class="system-card">
+                <div class="card-header">
+                    <div class="card-title">燃气系统</div>
+                    <span class="system-badge badge-gas">燃气</span>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">省份</span>
+                    <div class="field-value">山东省</div>
+                    <button class="select-btn" onclick="selectField('province', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">城市</span>
+                    <div class="field-value">济南市</div>
+                    <button class="select-btn" onclick="selectField('city', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">区县</span>
+                    <div class="field-value">历下区</div>
+                    <button class="select-btn" onclick="selectField('district', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">街道</span>
+                    <div class="field-value">解放路街道</div>
+                    <button class="select-btn" onclick="selectField('street', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">委员会</span>
+                    <div class="field-value different">文化东路社区委员会</div>
+                    <button class="select-btn" onclick="selectField('committee', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">小区</span>
+                    <div class="field-value different">文东花园</div>
+                    <button class="select-btn" onclick="selectField('community', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼栋</span>
+                    <div class="field-value">8号楼</div>
+                    <button class="select-btn" onclick="selectField('building', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">单元</span>
+                    <div class="field-value">2单元</div>
+                    <button class="select-btn" onclick="selectField('unit', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼层</span>
+                    <div class="field-value different">十五层</div>
+                    <button class="select-btn" onclick="selectField('floor', 'gas')">选择</button>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">门牌号</span>
+                    <div class="field-value">1502号</div>
+                    <button class="select-btn" onclick="selectField('room', 'gas')">选择</button>
+                </div>
+            </div>
+            
+            <!-- 标准地址卡片 -->
+            <div class="standard-card">
+                <div class="card-header">
+                    <div class="card-title">标准地址</div>
+                    <span class="system-badge badge-standard">标准</span>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">省份</span>
+                    <div class="field-value standard-field-value">山东省</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">城市</span>
+                    <div class="field-value standard-field-value">济南市</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">区县</span>
+                    <div class="field-value standard-field-value">历下区</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">街道</span>
+                    <div class="field-value standard-field-value">解放路街道</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">委员会</span>
+                    <div class="field-value standard-field-value">- 请选择 -</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">小区</span>
+                    <div class="field-value standard-field-value">- 请选择 -</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼栋</span>
+                    <div class="field-value standard-field-value">8号楼</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">单元</span>
+                    <div class="field-value standard-field-value">2单元</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">楼层</span>
+                    <div class="field-value standard-field-value">- 请选择 -</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">门牌号</span>
+                    <div class="field-value standard-field-value">1502室</div>
+                </div>
+                
+                <div class="address-field">
+                    <span class="field-label">完整标准地址</span>
+                    <div class="field-value standard-field-value" style="font-weight: 700; color: #2c3e50;">
+                        山东省济南市历下区解放路街道8号楼2单元1502室
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectField(field, system) {
+            const systems = ['construction', 'heating', 'gas'];
+            const fieldLabels = {
+                'province': '省份',
+                'city': '城市',
+                'district': '区县',
+                'street': '街道',
+                'committee': '委员会',
+                'community': '小区',
+                'building': '楼栋',
+                'unit': '单元',
+                'floor': '楼层',
+                'room': '门牌号'
+            };
+            
+            // 获取选中系统的字段值
+            const selectedSystem = systems.indexOf(system);
+            
+            // 找到对应系统卡片
+            const systemCard = document.querySelectorAll('.system-card')[selectedSystem];
+            
+            // 在该系统卡片中，找到具有特定字段标签的地址字段
+            const addressFields = systemCard.querySelectorAll('.address-field');
+            let selectedValue = '';
+            let fieldIndex = -1;
+            
+            // 遍历找到匹配的字段
+            for (let i = 0; i < addressFields.length; i++) {
+                const label = addressFields[i].querySelector('.field-label').textContent;
+                if (label === fieldLabels[field]) {
+                    selectedValue = addressFields[i].querySelector('.field-value').textContent;
+                    fieldIndex = i;
+                    break;
+                }
+            }
+            
+            if (fieldIndex === -1) return; // 如果未找到匹配字段，直接返回
+            
+            // 更新标准地址卡片中的对应字段
+            const standardCard = document.querySelector('.standard-card');
+            const standardFields = standardCard.querySelectorAll('.address-field');
+            
+            for (let i = 0; i < standardFields.length; i++) {
+                const label = standardFields[i].querySelector('.field-label').textContent;
+                if (label === fieldLabels[field]) {
+                    standardFields[i].querySelector('.field-value').textContent = selectedValue;
+                    break;
+                }
+            }
+            
+            // 移除所有系统中该字段的选中状态，并为当前选中的添加选中样式
+            for (let s = 0; s < systems.length; s++) {
+                const card = document.querySelectorAll('.system-card')[s];
+                const fields = card.querySelectorAll('.address-field');
+                
+                for (let f = 0; f < fields.length; f++) {
+                    const label = fields[f].querySelector('.field-label').textContent;
+                    if (label === fieldLabels[field]) {
+                        const fieldValue = fields[f].querySelector('.field-value');
+                        fieldValue.classList.remove('selected');
+                        
+                        if (s === selectedSystem) {
+                            fieldValue.classList.add('selected');
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // 更新完整标准地址
+            updateFullStandardAddress();
+        }
+        
+        function updateFullStandardAddress() {
+            const standardCard = document.querySelector('.standard-card');
+            const addressFields = standardCard.querySelectorAll('.address-field');
+            const values = [];
+            
+            // 遍历所有字段，收集非"请选择"的值
+            for (let i = 0; i < addressFields.length - 1; i++) { // 减1是为了排除完整地址字段
+                const value = addressFields[i].querySelector('.field-value').textContent;
+                if (value !== '- 请选择 -') {
+                    values.push(value);
+                }
+            }
+            
+            // 找到完整地址字段并更新
+            const fullAddressField = addressFields[addressFields.length - 1].querySelector('.field-value');
+            fullAddressField.textContent = values.join('');
+        }
+    </script>
+</body>
+</html>
+
